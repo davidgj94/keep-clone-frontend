@@ -90,6 +90,12 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 const StyledPaper = styled(Paper)(({ theme }) => ({
   maxWidth: theme.spacing(100),
   padding: theme.spacing(3),
+  marginRight: 'auto',
+  marginLeft: 'auto',
+  boxShadow: 'none',
+  borderStyle: 'solid',
+  borderWidth: '1px',
+  ':hover': { boxShadow: theme.shadows[3] },
 }));
 
 interface AppBarProps extends MuiAppBarProps {
@@ -206,11 +212,13 @@ export default function MiniDrawer() {
       </Drawer>
       <Box
         component="main"
-        sx={{ flexGrow: 1, p: 3, alignItems: 'center' }}
-        justifyContent="center"
+        sx={{ flexGrow: 1, p: 3, justifyContent: 'center' }}
       >
         <DrawerHeader />
         <StyledPaper>
+          <Typography variant="h6" component="h6" color="black">
+            Keep
+          </Typography>
           Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
           eiusmod tempor incididunt ut labore et dolore magna aliqua. Rhoncus
           dolor purus non enim praesent elementum facilisis leo vel. Risus at
