@@ -8,6 +8,7 @@ import List from '@mui/material/List';
 import CssBaseline from '@mui/material/CssBaseline';
 import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
+import Paper from '@mui/material/Paper';
 import IconButton from '@mui/material/IconButton';
 import SearchIcon from '@mui/icons-material/Search';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -50,9 +51,9 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
   borderRadius: theme.shape.borderRadius,
-  backgroundColor: alpha(theme.palette.common.white, 0.15),
+  backgroundColor: alpha(theme.palette.common.black, 0.15),
   '&:hover': {
-    backgroundColor: alpha(theme.palette.common.white, 0.25),
+    backgroundColor: alpha(theme.palette.common.black, 0.25),
   },
   marginRight: theme.spacing(2),
   marginLeft: theme.spacing(2),
@@ -73,7 +74,7 @@ const SearchIconWrapper = styled('div')(({ theme }) => ({
 }));
 
 const StyledInputBase = styled(InputBase)(({ theme }) => ({
-  color: 'inherit',
+  color: 'black',
   '& .MuiInputBase-input': {
     padding: theme.spacing(1, 1, 1, 0),
     // vertical padding + font size from searchIcon
@@ -86,6 +87,11 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  maxWidth: theme.spacing(100),
+  padding: theme.spacing(3),
+}));
+
 interface AppBarProps extends MuiAppBarProps {
   open?: boolean;
 }
@@ -93,6 +99,7 @@ interface AppBarProps extends MuiAppBarProps {
 const AppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== 'open',
 })<AppBarProps>(({ theme }) => ({
+  backgroundColor: theme.palette.common.white,
   zIndex: theme.zIndex.drawer + 1,
   transition: theme.transitions.create(['width', 'margin'], {
     easing: theme.transitions.easing.sharp,
@@ -109,7 +116,6 @@ const Drawer = styled(MuiDrawer, {
   boxSizing: 'border-box',
   ...(open && {
     ...openedMixin(theme),
-    '& .MuiDrawer-paper': openedMixin(theme),
   }),
   ...(!open && {
     ...closedMixin(theme),
@@ -124,7 +130,16 @@ export default function MiniDrawer() {
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
-      <AppBar position="fixed" open={open}>
+      <AppBar
+        position="fixed"
+        open={open}
+        sx={{
+          boxShadow: 0,
+          borderBottomWidth: 0.5,
+          borderBottomColor: 'black',
+          borderBottomStyle: 'solid',
+        }}
+      >
         <Toolbar>
           <IconButton
             color="inherit"
@@ -135,14 +150,14 @@ export default function MiniDrawer() {
               marginRight: 5,
             }}
           >
-            <MenuIcon />
+            <MenuIcon htmlColor="black" />
           </IconButton>
-          <Typography variant="h6" component="div">
+          <Typography variant="h6" component="div" color="black">
             Keep
           </Typography>
           <Search>
             <SearchIconWrapper>
-              <SearchIcon />
+              <SearchIcon htmlColor="black" />
             </SearchIconWrapper>
             <StyledInputBase
               placeholder="Search…"
@@ -158,7 +173,7 @@ export default function MiniDrawer() {
               aria-haspopup="true"
               color="inherit"
             >
-              <AccountCircle />
+              <AccountCircle htmlColor="black" />
             </IconButton>
           </Box>
         </Toolbar>
@@ -188,34 +203,14 @@ export default function MiniDrawer() {
             </ListItemButton>
           ))}
         </List>
-        <Divider />
-        <List>
-          {['All mail', 'Trash', 'Spam'].map((text, index) => (
-            <ListItemButton
-              key={text}
-              sx={{
-                minHeight: 48,
-                justifyContent: open ? 'initial' : 'center',
-                px: 2.5,
-              }}
-            >
-              <ListItemIcon
-                sx={{
-                  minWidth: 0,
-                  mr: open ? 3 : 'auto',
-                  justifyContent: 'center',
-                }}
-              >
-                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-              </ListItemIcon>
-              <ListItemText primary={text} sx={{ opacity: open ? 1 : 0 }} />
-            </ListItemButton>
-          ))}
-        </List>
       </Drawer>
-      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+      <Box
+        component="main"
+        sx={{ flexGrow: 1, p: 3, alignItems: 'center' }}
+        justifyContent="center"
+      >
         <DrawerHeader />
-        <Typography paragraph>
+        <StyledPaper>
           Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
           eiusmod tempor incididunt ut labore et dolore magna aliqua. Rhoncus
           dolor purus non enim praesent elementum facilisis leo vel. Risus at
@@ -229,21 +224,7 @@ export default function MiniDrawer() {
           vivamus at augue. At augue eget arcu dictum varius duis at consectetur
           lorem. Velit sed ullamcorper morbi tincidunt. Lorem donec massa sapien
           faucibus et molestie ac.
-        </Typography>
-        <Typography paragraph>
-          Consequat mauris nunc congue nisi vitae suscipit. Fringilla est
-          ullamcorper eget nulla facilisi etiam dignissim diam. Pulvinar
-          elementum integer enim neque volutpat ac tincidunt. Ornare suspendisse
-          sed nisi lacus sed viverra tellus. Purus sit amet volutpat consequat
-          mauris. Elementum eu facilisis sed odio morbi. Euismod lacinia at quis
-          risus sed vulputate odio. Morbi tincidunt ornare massa eget egestas
-          purus viverra accumsan in. In hendrerit gravida rutrum quisque non
-          tellus orci ac. Pellentesque nec nam aliquam sem et tortor. Habitant
-          morbi tristique senectus et. Adipiscing elit duis tristique
-          sollicitudin nibh sit. Ornare aenean euismod elementum nisi quis
-          eleifend. Commodo viverra maecenas accumsan lacus vel facilisis. Nulla
-          posuere sollicitudin aliquam ultrices sagittis orci a.
-        </Typography>
+        </StyledPaper>
       </Box>
     </Box>
   );
