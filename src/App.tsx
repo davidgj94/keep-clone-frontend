@@ -7,7 +7,6 @@ import Toolbar from '@mui/material/Toolbar';
 import List from '@mui/material/List';
 import CssBaseline from '@mui/material/CssBaseline';
 import Typography from '@mui/material/Typography';
-import Divider from '@mui/material/Divider';
 import Paper from '@mui/material/Paper';
 import IconButton from '@mui/material/IconButton';
 import SearchIcon from '@mui/icons-material/Search';
@@ -19,6 +18,9 @@ import ListItemText from '@mui/material/ListItemText';
 import InboxIcon from '@mui/icons-material/MoveToInbox';
 import MailIcon from '@mui/icons-material/Mail';
 import InputBase from '@mui/material/InputBase';
+
+import CustomizedDialog from './Modal';
+import EnterNote from './EnterNote';
 
 const drawerWidth = 240;
 
@@ -129,9 +131,27 @@ const Drawer = styled(MuiDrawer, {
   }),
 }));
 
+const title = 'Keep';
+const content = `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+eiusmod tempor incididunt ut labore et dolore magna aliqua. Rhoncus
+dolor purus non enim praesent elementum facilisis leo vel. Risus at
+ultrices mi tempus imperdiet. Semper risus in hendrerit gravida rutrum
+quisque non tellus. Convallis convallis tellus id interdum velit
+laoreet id donec ultrices. Odio morbi quis commodo odio aenean sed
+adipiscing. Amet nisl suscipit adipiscing bibendum est ultricies
+integer quis. Cursus euismod quis viverra nibh cras. Metus vulputate
+eu scelerisque felis imperdiet proin fermentum leo. Mauris commodo
+quis imperdiet massa tincidunt. Cras tincidunt lobortis feugiat
+vivamus at augue. At augue eget arcu dictum varius duis at consectetur
+lorem. Velit sed ullamcorper morbi tincidunt. Lorem donec massa sapien
+faucibus et molestie ac.`;
+
 export default function MiniDrawer() {
   const [open, setOpen] = React.useState(false);
+  const [openEdit, setOpenEdit] = React.useState(false);
+
   const toggleDrawer = () => setOpen((prev) => !prev);
+  const toggleOpenEdit = () => setOpenEdit((prev) => !prev);
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -215,25 +235,20 @@ export default function MiniDrawer() {
         sx={{ flexGrow: 1, p: 3, justifyContent: 'center' }}
       >
         <DrawerHeader />
-        <StyledPaper>
+        <EnterNote />
+        <StyledPaper onClick={toggleOpenEdit}>
           <Typography variant="h6" component="h6" color="black">
-            Keep
+            {title}
           </Typography>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-          eiusmod tempor incididunt ut labore et dolore magna aliqua. Rhoncus
-          dolor purus non enim praesent elementum facilisis leo vel. Risus at
-          ultrices mi tempus imperdiet. Semper risus in hendrerit gravida rutrum
-          quisque non tellus. Convallis convallis tellus id interdum velit
-          laoreet id donec ultrices. Odio morbi quis commodo odio aenean sed
-          adipiscing. Amet nisl suscipit adipiscing bibendum est ultricies
-          integer quis. Cursus euismod quis viverra nibh cras. Metus vulputate
-          eu scelerisque felis imperdiet proin fermentum leo. Mauris commodo
-          quis imperdiet massa tincidunt. Cras tincidunt lobortis feugiat
-          vivamus at augue. At augue eget arcu dictum varius duis at consectetur
-          lorem. Velit sed ullamcorper morbi tincidunt. Lorem donec massa sapien
-          faucibus et molestie ac.
+          {content}
         </StyledPaper>
       </Box>
+      <CustomizedDialog
+        content={content}
+        title={title}
+        handleClose={toggleOpenEdit}
+        open={openEdit}
+      ></CustomizedDialog>
     </Box>
   );
 }
