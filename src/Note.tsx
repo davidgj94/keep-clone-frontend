@@ -14,13 +14,15 @@ import PaletteIcon from '@mui/icons-material/Palette';
 import AddAlertIcon from '@mui/icons-material/AddAlert';
 import PersonAddAlt1Icon from '@mui/icons-material/PersonAddAlt1';
 import Popover from '@mui/material/Popover/Popover';
+import Badge from '@mui/material/Badge';
+import PushPinIcon from '@mui/icons-material/PushPin';
 
 const NoteBox = styled(Box, {
   shouldForwardProp: (prop) => prop !== 'hideOptions',
 })<{
   hideOptions?: boolean;
 }>(({ hideOptions, theme }) => ({
-  width: 400,
+  width: '400px',
   border: '1px solid #000',
   boxShadow: 'none',
   padding: theme.spacing(4),
@@ -45,8 +47,8 @@ const modalStyle = {
 const listStyle = {
   marginRight: 'auto',
   marginLeft: 'auto',
-  marginTop: 2,
-  marginBottom: 2,
+  //   marginTop: 2,
+  //   marginBottom: 2,
 } as SxProps<Theme>;
 
 interface Note {
@@ -88,6 +90,7 @@ interface NoteProps {
   note?: Note;
   customStyles?: SxProps<Theme>;
   onClick?: () => void;
+  onSelect?: () => void;
   hideOptions?: boolean;
 }
 
@@ -95,12 +98,16 @@ const Note = ({
   note,
   customStyles,
   onClick,
+  onSelect,
   hideOptions = false,
 }: NoteProps) => (
   <NoteBox
     component="div"
     sx={customStyles}
-    onClick={onClick}
+    onClick={() => {
+      if (onSelect) onSelect();
+      if (onClick) onClick();
+    }}
     hideOptions={hideOptions}
   >
     <Typography variant="h6" component="h2">
@@ -123,7 +130,10 @@ const Note = ({
       direction="row"
       spacing={1}
       className="options"
-      onClick={(e) => e.stopPropagation()}
+      onClick={(e) => {
+        if (onSelect) onSelect();
+        e.stopPropagation();
+      }}
     >
       <IconButton size="small" color="inherit">
         <AddAlertIcon />
@@ -166,32 +176,55 @@ const App = () => {
     { title: 'title1', content: 'aaaaaaaaaaaaaa', labels: ['aaa', 'bbb'] },
     { title: 'title2', content: 'bbbbbbbbbbbbbb', labels: ['aaa', 'bbb'] },
   ];
+
+  const isNoteSelected = (index: number) => index === noteIdx;
+
   return (
-    <div>
+    <>
       {notes.map((note, index) => (
-        <Note
+        <div
           key={index}
-          note={note}
-          customStyles={{
-            ...listStyle,
-            visibility: index !== noteIdx ? 'visible' : 'hidden',
+          style={{
+            marginRight: 'auto',
+            marginLeft: 'auto',
+            width: '400px',
+            ...(openModal
+              ? {
+                  visibility: !isNoteSelected(index) ? 'visible' : 'hidden',
+                }
+              : {}),
           }}
-          onClick={() => {
-            toggleModal();
-            setNoteIdx(index);
-          }}
-          hideOptions
-        />
+        >
+          <Badge
+            badgeContent={
+              isNoteSelected(index) ? (
+                <PushPinIcon sx={{ fontSize: '1.5em' }} />
+              ) : null
+            }
+            color="secondary"
+          >
+            <Note
+              note={note}
+              customStyles={{
+                ...(openModal
+                  ? {
+                      visibility: !isNoteSelected(index) ? 'visible' : 'hidden',
+                    }
+                  : {}),
+              }}
+              onClick={toggleModal}
+              onSelect={() => setNoteIdx(index)}
+              hideOptions
+            />
+          </Badge>
+        </div>
       ))}
       <CustomModal
         note={noteIdx !== undefined ? notes[noteIdx] : undefined}
-        onClose={() => {
-          toggleModal();
-          setNoteIdx(undefined);
-        }}
+        onClose={toggleModal}
         open={openModal}
       />
-    </div>
+    </>
   );
 };
 
