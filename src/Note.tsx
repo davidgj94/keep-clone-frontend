@@ -7,6 +7,13 @@ import SearchIcon from '@mui/icons-material/Search';
 import Modal from '@mui/material/Modal';
 import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
+import MoreVert from '@mui/icons-material/MoreVert';
+import ArchiveIcon from '@mui/icons-material/Archive';
+import ImageIcon from '@mui/icons-material/Image';
+import PaletteIcon from '@mui/icons-material/Palette';
+import AddAlertIcon from '@mui/icons-material/AddAlert';
+import PersonAddAlt1Icon from '@mui/icons-material/PersonAddAlt1';
+import Popover from '@mui/material/Popover/Popover';
 
 const NoteBox = styled(Box, {
   shouldForwardProp: (prop) => prop !== 'hideOptions',
@@ -47,6 +54,35 @@ interface Note {
   content: string;
   labels: string[];
 }
+
+const MoreButton = () => {
+  const [openPopover, setOpenPopover] = React.useState(false);
+  const togglePopover = () => setOpenPopover((prev) => !prev);
+  const ref = React.useRef(null);
+  return (
+    <>
+      <IconButton
+        size="small"
+        color="inherit"
+        ref={ref}
+        onClick={togglePopover}
+      >
+        <MoreVert />
+      </IconButton>
+      <Popover
+        open={openPopover}
+        anchorEl={ref.current}
+        onClose={togglePopover}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left',
+        }}
+      >
+        <Typography sx={{ p: 2 }}>The content of the Popover.</Typography>
+      </Popover>
+    </>
+  );
+};
 
 interface NoteProps {
   note?: Note;
@@ -89,9 +125,22 @@ const Note = ({
       className="options"
       onClick={(e) => e.stopPropagation()}
     >
-      {note?.labels?.map((label) => (
-        <Chip key={label} label={label} />
-      ))}
+      <IconButton size="small" color="inherit">
+        <AddAlertIcon />
+      </IconButton>
+      <IconButton size="small" color="inherit">
+        <PersonAddAlt1Icon />
+      </IconButton>
+      <IconButton size="small" color="inherit">
+        <PaletteIcon />
+      </IconButton>
+      <IconButton size="small" color="inherit">
+        <ImageIcon />
+      </IconButton>
+      <IconButton size="small" color="inherit">
+        <ArchiveIcon />
+      </IconButton>
+      <MoreButton />
     </Stack>
   </NoteBox>
 );
