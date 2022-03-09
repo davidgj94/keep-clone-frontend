@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { styled, Theme, CSSObject, alpha } from '@mui/material/styles';
+import { styled, Theme, CSSObject, alpha, SxProps } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
@@ -8,78 +8,93 @@ import Modal from '@mui/material/Modal';
 import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
 
+const NoteBox = styled(Box, {
+  shouldForwardProp: (prop) => prop !== 'hideOptions',
+})<{
+  hideOptions?: boolean;
+}>(({ hideOptions, theme }) => ({
+  width: 400,
+  border: '1px solid #000',
+  boxShadow: 'none',
+  padding: theme.spacing(4),
+  borderRadius: theme.shape.borderRadius,
+  ':hover': { boxShadow: theme.shadows[10] },
+  ...(hideOptions
+    ? {
+        '.options': { visibility: 'hidden' } as CSSObject,
+        ':hover .options': { visibility: 'visible' } as CSSObject,
+      }
+    : {}),
+}));
+
 const modalStyle = {
   position: 'absolute',
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
   bgcolor: 'background.paper',
-};
-
-const baseStyle = {
-  width: 400,
-  border: '1px solid #000',
-  boxShadow: 'none',
-  p: 4,
-  borderRadius: 1,
-  ':hover': { boxShadow: 10 },
-};
+} as SxProps<Theme>;
 
 const listStyle = {
   marginRight: 'auto',
   marginLeft: 'auto',
   marginTop: 2,
   marginBottom: 2,
-};
+} as SxProps<Theme>;
 
-interface NoteProps {
+interface Note {
   title: string;
   content: string;
-  customStyles?: any;
-  labels: React.ReactNode;
-  onClick?: () => void;
-}
-
-const Note = ({ title, content, customStyles, labels, onClick }: NoteProps) => (
-  <Box component="div" sx={{ ...baseStyle, ...customStyles }} onClick={onClick}>
-    <Typography variant="h6" component="h2">
-      {title}
-    </Typography>
-    <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-      {content}
-    </Typography>
-    {labels}
-  </Box>
-);
-
-interface LabelsStackProps {
   labels: string[];
 }
 
-const LabelsStack = ({ labels }: LabelsStackProps) => (
-  <Stack direction="row" spacing={1}>
-    {labels.map((label) => (
-      <Chip key={label} label={label} onDelete={() => ''} />
-    ))}
-  </Stack>
+interface NoteProps {
+  note?: Note;
+  customStyles?: SxProps<Theme>;
+  onClick?: () => void;
+  hideOptions?: boolean;
+}
+
+const Note = ({
+  note,
+  customStyles,
+  onClick,
+  hideOptions = false,
+}: NoteProps) => (
+  <NoteBox
+    component="div"
+    sx={customStyles}
+    onClick={onClick}
+    hideOptions={hideOptions}
+  >
+    <Typography variant="h6" component="h2">
+      {note?.title || ''}
+    </Typography>
+    <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+      {note?.content || ''}
+    </Typography>
+    <Stack direction="row" spacing={1}>
+      {note?.labels?.map((label) => (
+        <Chip key={label} label={label} onDelete={() => ''} />
+      ))}
+    </Stack>
+    <Stack direction="row" spacing={1} className="options">
+      {note?.labels?.map((label) => (
+        <Chip key={label} label={label} onDelete={() => ''} />
+      ))}
+    </Stack>
+  </NoteBox>
 );
 
 interface ModalProps {
-  title?: string;
-  content?: string;
-  labels: React.ReactNode;
+  note?: Note;
   open: boolean;
   onClose: () => void;
 }
 
-const CustomModal = ({ title, content, open, onClose, labels }: ModalProps) => (
+const CustomModal = ({ note, open, onClose }: ModalProps) => (
   <Modal open={open} onClose={onClose}>
-    <Note
-      title={title || ''}
-      content={content || ''}
-      customStyles={modalStyle}
-      labels={labels}
-    />
+    <Note note={note} customStyles={modalStyle} />
   </Modal>
 );
 
@@ -89,35 +104,32 @@ const App = () => {
   const [noteIdx, setNoteIdx] = React.useState<number | undefined>();
 
   const notes = [
-    { title: 'title1', content: 'aaaaaaaaaaaaaa' },
-    { title: 'title2', content: 'bbbbbbbbbbbbbb' },
+    { title: 'title1', content: 'aaaaaaaaaaaaaa', labels: ['aaa', 'bbb'] },
+    { title: 'title2', content: 'bbbbbbbbbbbbbb', labels: ['aaa', 'bbb'] },
   ];
   return (
     <div>
       {notes.map((note, index) => (
         <Note
           key={index}
-          title={note.title}
-          content={note.content}
+          note={note}
           customStyles={{
             ...listStyle,
             visibility: index !== noteIdx ? 'visible' : 'hidden',
           }}
-          labels={<LabelsStack labels={['aa', 'bb']} />}
           onClick={() => {
             toggleModal();
             setNoteIdx(index);
           }}
+          hideOptions
         />
       ))}
       <CustomModal
-        title={noteIdx !== undefined ? notes[noteIdx].title : ''}
-        content={noteIdx !== undefined ? notes[noteIdx].content : ''}
+        note={noteIdx !== undefined ? notes[noteIdx] : undefined}
         onClose={() => {
           toggleModal();
           setNoteIdx(undefined);
         }}
-        labels={<LabelsStack labels={['aa', 'bb']} />}
         open={openModal}
       />
     </div>
