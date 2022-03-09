@@ -75,12 +75,22 @@ const Note = ({
     </Typography>
     <Stack direction="row" spacing={1}>
       {note?.labels?.map((label) => (
-        <Chip key={label} label={label} onDelete={() => ''} />
+        <Chip
+          key={label}
+          label={label}
+          onDelete={() => ''}
+          onClick={(e) => e.stopPropagation()}
+        />
       ))}
     </Stack>
-    <Stack direction="row" spacing={1} className="options">
+    <Stack
+      direction="row"
+      spacing={1}
+      className="options"
+      onClick={(e) => e.stopPropagation()}
+    >
       {note?.labels?.map((label) => (
-        <Chip key={label} label={label} onDelete={() => ''} />
+        <Chip key={label} label={label} />
       ))}
     </Stack>
   </NoteBox>
