@@ -17,6 +17,8 @@ import Popover from '@mui/material/Popover/Popover';
 import Badge from '@mui/material/Badge';
 import PushPinIcon from '@mui/icons-material/PushPin';
 
+import { flow } from 'lodash';
+
 const NoteBox = styled(Box, {
   shouldForwardProp: (prop) => prop !== 'hideOptions',
 })<{
@@ -28,13 +30,10 @@ const NoteBox = styled(Box, {
   boxShadow: 'none',
   padding: theme.spacing(4),
   borderRadius: theme.shape.borderRadius,
+  '.options': { visibility: 'hidden' },
   ':hover': { boxShadow: theme.shadows[10] },
-  ...(hideOptions
-    ? {
-        '.options': { visibility: 'hidden' } as CSSObject,
-        ':hover .options': { visibility: 'visible' } as CSSObject,
-      }
-    : {}),
+  ':hover .options': { visibility: 'visible' } as CSSObject,
+  ':focus .options': { visibility: 'visible' } as CSSObject,
 }));
 
 const modalStyle = {
@@ -91,7 +90,8 @@ interface NoteProps {
   note?: Note;
   customStyles?: SxProps<Theme>;
   onClick?: () => void;
-  onSelect?: () => void;
+  onFocus?: () => void;
+  onBlur?: () => void;
   hideOptions?: boolean;
 }
 
@@ -99,14 +99,21 @@ const Note = ({
   note,
   customStyles,
   onClick,
-  onSelect,
+  onFocus,
+  onBlur,
   hideOptions = false,
 }: NoteProps) => (
   <NoteBox
     component="div"
+    tabIndex={0}
     sx={customStyles}
+    onFocus={() => {
+      if (onFocus) onFocus();
+    }}
+    onBlur={() => {
+      if (onBlur) onBlur();
+    }}
     onClick={() => {
-      if (onSelect) onSelect();
       if (onClick) onClick();
     }}
     hideOptions={hideOptions}
@@ -132,7 +139,6 @@ const Note = ({
       spacing={1}
       className="options"
       onClick={(e) => {
-        if (onSelect) onSelect();
         e.stopPropagation();
       }}
     >
@@ -155,6 +161,23 @@ const Note = ({
     </Stack>
   </NoteBox>
 );
+
+const NoteBadgeHOC = ({ children }: { children: React.ReactElement }) => {
+  const [focus, setFocus] = React.useState(false);
+  const toggleFocus = () => setFocus((prev) => !prev);
+  return (
+    <Badge
+      component="span"
+      badgeContent={focus ? <PushPinIcon sx={{ fontSize: '1.5em' }} /> : null}
+      color="secondary"
+    >
+      {React.cloneElement(children, {
+        onFocus: toggleFocus,
+        onBlur: toggleFocus,
+      })}
+    </Badge>
+  );
+};
 
 interface ModalProps {
   note?: Note;
@@ -196,21 +219,13 @@ const App = () => {
               : {}),
           }}
         >
-          <Badge
-            badgeContent={
-              isNoteSelected(index) ? (
-                <PushPinIcon sx={{ fontSize: '1.5em' }} />
-              ) : null
-            }
-            color="secondary"
-          >
+          <NoteBadgeHOC>
             <Note
               note={note}
-              onClick={toggleModal}
-              onSelect={() => setNoteIdx(index)}
+              onClick={flow([toggleModal, () => setNoteIdx(index)])}
               hideOptions
             />
-          </Badge>
+          </NoteBadgeHOC>
         </div>
       ))}
       <CustomModal
