@@ -23,6 +23,7 @@ const NoteBox = styled(Box, {
   hideOptions?: boolean;
 }>(({ hideOptions, theme }) => ({
   width: '400px',
+  boxSizing: 'border-box',
   border: '1px solid #000',
   boxShadow: 'none',
   padding: theme.spacing(4),
@@ -205,13 +206,6 @@ const App = () => {
           >
             <Note
               note={note}
-              customStyles={{
-                ...(openModal
-                  ? {
-                      visibility: !isNoteSelected(index) ? 'visible' : 'hidden',
-                    }
-                  : {}),
-              }}
               onClick={toggleModal}
               onSelect={() => setNoteIdx(index)}
               hideOptions
