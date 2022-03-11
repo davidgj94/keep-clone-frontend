@@ -13,17 +13,17 @@ import ImageIcon from '@mui/icons-material/Image';
 import PaletteIcon from '@mui/icons-material/Palette';
 import AddAlertIcon from '@mui/icons-material/AddAlert';
 import PersonAddAlt1Icon from '@mui/icons-material/PersonAddAlt1';
-import Popover from '@mui/material/Popover/Popover';
 import Badge from '@mui/material/Badge';
 import PushPinIcon from '@mui/icons-material/PushPin';
+import ClickAwayListener from '@mui/material/ClickAwayListener';
 
 import { flow } from 'lodash';
 
 const NoteBox = styled(Box, {
-  shouldForwardProp: (prop) => prop !== 'hideOptions',
+  shouldForwardProp: (prop) => prop !== 'isSelected',
 })<{
-  hideOptions?: boolean;
-}>(({ hideOptions, theme }) => ({
+  isSelected?: boolean;
+}>(({ theme, isSelected }) => ({
   width: '400px',
   boxSizing: 'border-box',
   border: '1px solid #000',
@@ -33,7 +33,7 @@ const NoteBox = styled(Box, {
   '.options': { visibility: 'hidden' },
   ':hover': { boxShadow: theme.shadows[10] },
   ':hover .options': { visibility: 'visible' } as CSSObject,
-  ':focus .options': { visibility: 'visible' } as CSSObject,
+  ...(isSelected ? { '.options': { visibility: 'visible' } } : {}),
 }));
 
 const modalStyle = {
@@ -57,7 +57,11 @@ interface Note {
   labels: string[];
 }
 
-const MoreButton = () => {
+interface MoreButtonProps {
+  allowOpenPopover: boolean;
+}
+
+const MoreButton = ({ allowOpenPopover }: MoreButtonProps) => {
   const [openPopover, setOpenPopover] = React.useState(false);
   const togglePopover = () => setOpenPopover((prev) => !prev);
   const ref = React.useRef(null);
@@ -71,17 +75,19 @@ const MoreButton = () => {
       >
         <MoreVert />
       </IconButton>
-      <Popover
-        open={openPopover}
-        anchorEl={ref.current}
-        onClose={togglePopover}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'left',
-        }}
-      >
-        <Typography sx={{ p: 2 }}>The content of the Popover.</Typography>
-      </Popover>
+      {allowOpenPopover && openPopover && (
+        <Box
+          sx={{
+            position: 'fixed',
+            top: (ref.current as any).getBoundingClientRect().bottom,
+            left: (ref.current as any).getBoundingClientRect().left,
+            width: '100px',
+            height: '200px',
+          }}
+        >
+          aaaaa
+        </Box>
+      )}
     </>
   );
 };
@@ -90,33 +96,25 @@ interface NoteProps {
   note?: Note;
   customStyles?: SxProps<Theme>;
   onClick?: () => void;
-  onFocus?: () => void;
-  onBlur?: () => void;
-  hideOptions?: boolean;
+  onSelect?: () => void;
+  isSelected?: boolean;
 }
 
 const Note = ({
   note,
   customStyles,
   onClick,
-  onFocus,
-  onBlur,
-  hideOptions = false,
+  onSelect,
+  isSelected = false,
 }: NoteProps) => (
   <NoteBox
     component="div"
     tabIndex={0}
     sx={customStyles}
-    onFocus={() => {
-      if (onFocus) onFocus();
-    }}
-    onBlur={() => {
-      if (onBlur) onBlur();
-    }}
     onClick={() => {
       if (onClick) onClick();
     }}
-    hideOptions={hideOptions}
+    isSelected={isSelected}
   >
     <Typography variant="h6" component="h2">
       {note?.title || ''}
@@ -139,6 +137,7 @@ const Note = ({
       spacing={1}
       className="options"
       onClick={(e) => {
+        if (onSelect) onSelect();
         e.stopPropagation();
       }}
     >
@@ -157,27 +156,43 @@ const Note = ({
       <IconButton size="small" color="inherit">
         <ArchiveIcon />
       </IconButton>
-      <MoreButton />
+      <MoreButton allowOpenPopover={isSelected} />
     </Stack>
   </NoteBox>
 );
 
-const NoteBadgeHOC = ({ children }: { children: React.ReactElement }) => {
-  const [focus, setFocus] = React.useState(false);
-  const toggleFocus = () => setFocus((prev) => !prev);
-  return (
-    <Badge
-      component="span"
-      badgeContent={focus ? <PushPinIcon sx={{ fontSize: '1.5em' }} /> : null}
-      color="secondary"
-    >
-      {React.cloneElement(children, {
-        onFocus: toggleFocus,
-        onBlur: toggleFocus,
-      })}
-    </Badge>
-  );
-};
+const NoteBadgeHOC = React.forwardRef(
+  (
+    {
+      children,
+      isSelected,
+    }: {
+      children: React.ReactElement;
+      isSelected: boolean;
+    },
+    ref
+  ) => {
+    const [showBadge, setShowBadge] = React.useState(false);
+    const toggleBadge = () => setShowBadge((prev) => !prev);
+    return (
+      <Badge
+        component="span"
+        badgeContent={
+          isSelected ? <PushPinIcon sx={{ fontSize: '1.5em' }} /> : null
+        }
+        color="secondary"
+        // @ts-expect-error error
+        ref={ref}
+      >
+        {React.cloneElement(children, {
+          isSelected,
+        })}
+      </Badge>
+    );
+  }
+);
+
+NoteBadgeHOC.displayName = 'NoteBadgeHOC';
 
 interface ModalProps {
   note?: Note;
@@ -187,7 +202,7 @@ interface ModalProps {
 
 const CustomModal = ({ note, open, onClose }: ModalProps) => (
   <Modal open={open} onClose={onClose}>
-    <Note note={note} customStyles={modalStyle} />
+    <Note note={note} customStyles={modalStyle} isSelected />
   </Modal>
 );
 
@@ -202,6 +217,7 @@ const App = () => {
   ];
 
   const isNoteSelected = (index: number) => index === noteIdx;
+  console.log(noteIdx);
 
   return (
     <>
@@ -219,13 +235,15 @@ const App = () => {
               : {}),
           }}
         >
-          <NoteBadgeHOC>
-            <Note
-              note={note}
-              onClick={flow([toggleModal, () => setNoteIdx(index)])}
-              hideOptions
-            />
-          </NoteBadgeHOC>
+          <ClickAwayListener onClickAway={() => setNoteIdx(undefined)}>
+            <NoteBadgeHOC isSelected={isNoteSelected(index)}>
+              <Note
+                note={note}
+                onClick={toggleModal}
+                onSelect={() => setNoteIdx(index)}
+              />
+            </NoteBadgeHOC>
+          </ClickAwayListener>
         </div>
       ))}
       <CustomModal
