@@ -33,7 +33,7 @@ const NoteBox = styled(Box, {
   '.options': { visibility: 'hidden' },
   ':hover': { boxShadow: theme.shadows[10] },
   ':hover .options': { visibility: 'visible' } as CSSObject,
-  ...(isSelected ? { '.options': { visibility: 'visible' } } : {}),
+  ...(isSelected ? { '.options': { visibility: 'inherit' } } : {}),
 }));
 
 const modalStyle = {
@@ -55,6 +55,7 @@ interface Note {
   title: string;
   content: string;
   labels: string[];
+  id: string;
 }
 
 interface MoreButtonProps {
@@ -96,7 +97,7 @@ interface NoteProps {
   note?: Note;
   customStyles?: SxProps<Theme>;
   onClick?: () => void;
-  onSelect?: () => void;
+  onOptionsClick?: () => void;
   isSelected?: boolean;
 }
 
@@ -104,16 +105,14 @@ const Note = ({
   note,
   customStyles,
   onClick,
-  onSelect,
+  onOptionsClick,
   isSelected = false,
 }: NoteProps) => (
   <NoteBox
     component="div"
     tabIndex={0}
     sx={customStyles}
-    onClick={() => {
-      if (onClick) onClick();
-    }}
+    onClick={() => onClick && onClick()}
     isSelected={isSelected}
   >
     <Typography variant="h6" component="h2">
@@ -137,8 +136,10 @@ const Note = ({
       spacing={1}
       className="options"
       onClick={(e) => {
-        if (onSelect) onSelect();
-        e.stopPropagation();
+        if (onOptionsClick) {
+          onOptionsClick();
+          e.stopPropagation();
+        }
       }}
     >
       <IconButton size="small" color="inherit">
@@ -166,27 +167,29 @@ const NoteBadgeHOC = React.forwardRef(
     {
       children,
       isSelected,
+      onBadgeClick,
     }: {
       children: React.ReactElement;
       isSelected: boolean;
+      onBadgeClick: () => void;
     },
     ref
   ) => {
     const [showBadge, setShowBadge] = React.useState(false);
-    const toggleBadge = () => setShowBadge((prev) => !prev);
     return (
       <Badge
-        component="span"
-        badgeContent={
-          isSelected ? <PushPinIcon sx={{ fontSize: '1.5em' }} /> : null
-        }
+        component="div"
+        badgeContent={<PushPinIcon sx={{ fontSize: '1.5em' }} />}
+        invisible={!(isSelected || showBadge)}
         color="secondary"
         // @ts-expect-error error
         ref={ref}
+        onClick={flow([(e) => e.stopPropagation(), onBadgeClick])}
+        onMouseEnter={() => setShowBadge(true)}
+        onMouseLeave={() => setShowBadge(false)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
       >
-        {React.cloneElement(children, {
-          isSelected,
-        })}
+        {children}
       </Badge>
     );
   }
@@ -210,10 +213,22 @@ const App = () => {
   const [openModal, setOpenModal] = React.useState(false);
   const toggleModal = () => setOpenModal((prev) => !prev);
   const [noteIdx, setNoteIdx] = React.useState<number | undefined>();
+  const [selectMode, setSelectMode] = React.useState(false);
+  const [selectedNotes, setSelectedNotes] = React.useState<Note[]>([]);
 
-  const notes = [
-    { title: 'title1', content: 'aaaaaaaaaaaaaa', labels: ['aaa', 'bbb'] },
-    { title: 'title2', content: 'bbbbbbbbbbbbbb', labels: ['aaa', 'bbb'] },
+  const notes: Note[] = [
+    {
+      id: '123',
+      title: 'title1',
+      content: 'aaaaaaaaaaaaaa',
+      labels: ['aaa', 'bbb'],
+    },
+    {
+      id: '345',
+      title: 'title2',
+      content: 'bbbbbbbbbbbbbb',
+      labels: ['aaa', 'bbb'],
+    },
   ];
 
   const isNoteSelected = (index: number) => index === noteIdx;
@@ -228,6 +243,7 @@ const App = () => {
             marginRight: 'auto',
             marginLeft: 'auto',
             width: '400px',
+            marginBottom: '20px',
             ...(openModal
               ? {
                   visibility: !isNoteSelected(index) ? 'visible' : 'hidden',
@@ -235,12 +251,19 @@ const App = () => {
               : {}),
           }}
         >
-          <ClickAwayListener onClickAway={() => setNoteIdx(undefined)}>
-            <NoteBadgeHOC isSelected={isNoteSelected(index)}>
+          <ClickAwayListener
+            onClickAway={() => setNoteIdx(undefined)}
+            mouseEvent={!openModal ? 'onClick' : false}
+          >
+            <NoteBadgeHOC
+              isSelected={isNoteSelected(index)}
+              onBadgeClick={() => ''}
+            >
               <Note
                 note={note}
-                onClick={toggleModal}
-                onSelect={() => setNoteIdx(index)}
+                onClick={flow([toggleModal, () => setNoteIdx(index)])}
+                onOptionsClick={() => setNoteIdx(index)}
+                isSelected={isNoteSelected(index)}
               />
             </NoteBadgeHOC>
           </ClickAwayListener>

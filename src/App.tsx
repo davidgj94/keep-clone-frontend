@@ -18,6 +18,7 @@ import ListItemText from '@mui/material/ListItemText';
 import InboxIcon from '@mui/icons-material/MoveToInbox';
 import MailIcon from '@mui/icons-material/Mail';
 import InputBase from '@mui/material/InputBase';
+import Modal from '@mui/material/Modal';
 
 import CustomizedDialog from './Modal';
 import EnterNote from './EnterNote';
@@ -89,12 +90,12 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-const StyledPaper = styled(Paper)(({ theme }) => ({
+const StyledPaper = styled(Box)(({ theme }) => ({
   maxWidth: theme.spacing(100),
   padding: theme.spacing(3),
   marginRight: 'auto',
   marginLeft: 'auto',
-  boxShadow: 'none',
+  bgcolor: 'background.paper',
   borderStyle: 'solid',
   borderWidth: '1px',
   ':hover': { boxShadow: theme.shadows[3] },
@@ -236,19 +237,46 @@ export default function MiniDrawer() {
       >
         <DrawerHeader />
         <EnterNote />
-        <StyledPaper onClick={toggleOpenEdit}>
+        {openEdit && (
+          <Modal
+            open={openEdit}
+            onClose={toggleOpenEdit}
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <StyledPaper>
+              <Typography variant="h6" component="h6" color="black">
+                {title}
+              </Typography>
+              {content}
+            </StyledPaper>
+          </Modal>
+        )}
+        <StyledPaper
+          onClick={toggleOpenEdit}
+          sx={{ visibility: !openEdit ? 'visible' : 'hidden' }}
+        >
+          <Typography variant="h6" component="h6" color="black">
+            {title}
+          </Typography>
+          {content}
+        </StyledPaper>
+        <StyledPaper>
           <Typography variant="h6" component="h6" color="black">
             {title}
           </Typography>
           {content}
         </StyledPaper>
       </Box>
-      <CustomizedDialog
+      {/* <CustomizedDialog
         content={content}
         title={title}
         handleClose={toggleOpenEdit}
         open={openEdit}
-      ></CustomizedDialog>
+      ></CustomizedDialog> */}
     </Box>
   );
 }
