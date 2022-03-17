@@ -1,7 +1,10 @@
 import { AxiosRequestConfig, AxiosInstance } from 'axios';
 
 type Extract<T, U> = U extends keyof T ? T[U] : undefined;
-type ExtractResponse<T, U extends number> = NonNullable<Extract<T, U>>;
+type ValueOf<T> = T[keyof T];
+type ExtractResponse<T, U extends number> = ValueOf<
+  NonNullable<Extract<Extract<T, 'responses'>, U>>
+>;
 type SwaggerParams = { path: any; body: any; query: any };
 
 const buildURL = (url: string, parameters: any = {}): string =>

@@ -1,14 +1,19 @@
-import axios, { AxiosInstance } from 'axios';
-import { operations } from '../types/swagger';
+import axios from 'axios';
+import { paths } from '../types/swagger';
+import { swaggerClient } from './swaggerClient';
 
-type GetNotesOp = operations['getNotes'];
-type GetLabelsOp = operations['getLabels'];
-type ModifyLabel = operations['modifyLabel'];
+const requestFactory = swaggerClient<paths>(
+  axios.create({ baseURL: 'http://localhost:8000' })
+);
 
-export const getNotes = async (params: {
-  query: GetNotesOp['parameters']['query'];
-}): Promise<GetNotesOp['responses'][200]['schema']> => '';
+export class NotesAPI {
+  static getNotes = requestFactory('/notes', 'get');
+  static createNote = requestFactory('/notes', 'post');
+  static modifyNote = requestFactory('/notes/{noteId}', 'put');
+}
 
-export const getLabels = async (): Promise<
-  GetLabelsOp['responses'][200]['schema']
-> => '';
+export class LabelsAPI {
+  static getLabels = requestFactory('/labels', 'get');
+  static createLabel = requestFactory('/labels', 'post');
+  static modifyLabel = requestFactory('/labels/{labelId}', 'put');
+}
