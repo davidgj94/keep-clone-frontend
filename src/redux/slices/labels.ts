@@ -2,21 +2,36 @@ import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import type { AppDispatch, RootState } from '../store';
 import { HashMap } from '../../types/utils';
 import { definitions } from '../../types/swagger';
-import * as API from '../../api';
+import { LabelsAPI } from '../../api';
+import { Label } from '@mui/icons-material';
+
+type Label = definitions['Label'];
 
 const fetchLabels = createAsyncThunk(
   'labels/fetchLabels',
-  // if you type your function argument here
-  async () => await API.getLabels()
+  async () => await LabelsAPI.getLabels()
+);
+
+const createLabel = createAsyncThunk(
+  'labels/createLabel',
+  async (label: Label) => await LabelsAPI.createLabel({ body: { data: label } })
+);
+
+const modifyLabel = createAsyncThunk(
+  'labels/modifyLabel',
+  async ({ labelId, label }: { labelId: string; label: Label }) =>
+    await LabelsAPI.modifyLabel({ path: { labelId }, body: { data: label } })
 );
 
 type LabelState = {
   labelsById: HashMap<definitions['Label']>;
+  labelsList: string[];
 };
 
 // Define the initial state using that type
 const initialState: LabelState = {
   labelsById: {},
+  labelsList: [],
 };
 
 export const slice = createSlice({
@@ -34,9 +49,27 @@ export const slice = createSlice({
         }, {} as typeof state.labelsById);
       }
     });
+
+    builder.addCase(createLabel.fulfilled, (state, action) => {
+      const newLabel = action.payload;
+      const labelId = newLabel.id as string;
+      state.labelsById[labelId] = newLabel;
+      state.labelsList.unshift(labelId);
+    });
+
+    builder.addCase(modifyLabel.fulfilled, (state, action) => {
+      const newLabel = action.payload;
+      const labelId = newLabel.id as string;
+      state.labelsById[labelId] = newLabel;
+    });
   },
 });
 
-export const actions = { ...slice.actions, fetchLabels };
+export const actions = {
+  ...slice.actions,
+  fetchLabels,
+  createLabel,
+  modifyLabel,
+};
 
 export default slice.reducer;

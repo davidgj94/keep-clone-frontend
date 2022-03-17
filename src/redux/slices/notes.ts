@@ -2,22 +2,37 @@ import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import type { AppDispatch, RootState } from '../store';
 import { HashMap } from '../../types/utils';
 import { definitions } from '../../types/swagger';
-import * as API from '../../api';
+import { NotesAPI } from '../../api';
+
+type Note = definitions['Note'];
 
 const fetchNotes = createAsyncThunk(
   'notes/fetchNotes',
-  // if you type your function argument here
   async ({
     cursor,
     limit = 10,
     labelId,
-  }: Parameters<typeof API.getNotes>[0]['query']) =>
-    await API.getNotes({ query: { cursor, limit, labelId } })
+  }: {
+    cursor?: string;
+    limit?: number;
+    labelId?: string;
+  }) => await NotesAPI.getNotes({ query: { cursor, limit, labelId } })
+);
+
+const createNote = createAsyncThunk(
+  'notes/createNote',
+  async (note: Note) => await NotesAPI.createNote({ body: { data: note } })
+);
+
+const modifyNote = createAsyncThunk(
+  'notes/modifyNote',
+  async ({ noteId, note }: { noteId: string; note: Note }) =>
+    await NotesAPI.modifyNote({ path: { noteId }, body: { data: note } })
 );
 
 type NoteState = {
-  notesById: HashMap<definitions['Note']>;
-  noteListState: {
+  notesById: HashMap<Note>;
+  noteList: {
     data: string[];
     cursor?: string;
     hasMore: boolean;
@@ -27,7 +42,7 @@ type NoteState = {
 // Define the initial state using that type
 const initialState: NoteState = {
   notesById: {},
-  noteListState: { data: [], hasMore: true },
+  noteList: { data: [], hasMore: true },
 };
 
 export const slice = createSlice({
@@ -43,12 +58,25 @@ export const slice = createSlice({
       data.forEach((note) => {
         state.notesById[note.id as string] = note;
       });
-      state.noteListState.data.push(...data.map(({ id }) => id as string));
-      state.noteListState = { ...state.noteListState, cursor, hasMore };
+      state.noteList.data.push(...data.map(({ id }) => id as string));
+      state.noteList = { ...state.noteList, cursor, hasMore };
+    });
+
+    builder.addCase(createNote.fulfilled, (state, action) => {
+      const newNote = action.payload;
+      const noteId = newNote.id as string;
+      state.notesById[noteId] = newNote;
+      state.noteList.data.unshift(noteId);
+    });
+
+    builder.addCase(modifyNote.fulfilled, (state, action) => {
+      const newNote = action.payload;
+      const noteId = newNote.id as string;
+      state.notesById[noteId] = newNote;
     });
   },
 });
 
-export const actions = { ...slice.actions, fetchNotes };
+export const actions = { ...slice.actions, fetchNotes, createNote, modifyNote };
 
 export default slice.reducer;

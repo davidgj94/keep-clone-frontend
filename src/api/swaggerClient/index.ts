@@ -5,6 +5,9 @@ type ValueOf<T> = T[keyof T];
 type ExtractResponse<T, U extends number> = ValueOf<
   NonNullable<Extract<Extract<T, 'responses'>, U>>
 >;
+type ExtractParmeters<T> = Extract<T, 'parameters'> extends undefined
+  ? void
+  : Extract<T, 'parameters'>;
 type SwaggerParams = { path: any; body: any; query: any };
 
 const buildURL = (url: string, parameters: any = {}): string =>
@@ -20,10 +23,10 @@ export const swaggerClient =
     method: Method
   ) =>
   async (
-    parameters: Extract<paths[Endpoint][Method], 'parameters'>
+    parameters: ExtractParmeters<paths[Endpoint][Method]>
   ): Promise<ExtractResponse<paths[Endpoint][Method], 200 | 201>> =>
     axiosInstance
-      .request<ExtractResponse<paths[Endpoint][Method], 200 | 201>>({
+      .request({
         url: buildURL(
           url as string,
           (parameters as unknown as SwaggerParams)['path']
