@@ -13,8 +13,8 @@ import { CSSObject, styled, SxProps, Theme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 
 import { useAppSelector, useAppDispatch } from '../../../../hooks';
-
 import MoreButton from './MoreButton';
+import NoteLabels from './NoteLabels';
 
 interface NoteBoxProps {
   isFocused?: boolean;
@@ -73,16 +73,7 @@ const Note = ({
       <Typography id="modal-modal-description" sx={{ mt: 2 }}>
         {note?.content}
       </Typography>
-      <Stack direction="row" spacing={1}>
-        {note?.labels?.map((label) => (
-          <Chip
-            key={label}
-            label={label}
-            onDelete={() => ''}
-            onClick={(e) => e.stopPropagation()}
-          />
-        ))}
-      </Stack>
+      <NoteLabels labelIds={note.labels as string[]} />
       <Stack
         direction="row"
         spacing={1}
