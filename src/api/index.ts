@@ -1,10 +1,18 @@
 import axios from 'axios';
 import { paths } from '../types/swagger';
 import { swaggerClient } from './swaggerClient';
+import config from '../config';
 
-const requestFactory = swaggerClient<paths>(
-  axios.create({ baseURL: 'http://localhost:8000' })
-);
+const axiosInstance = axios.create({
+  baseURL: config.BACKEND_URL,
+  headers: {
+    Authorization: `Bearer ${
+      localStorage.getItem('keep-clone-access_token') || ''
+    }`,
+  },
+});
+
+const requestFactory = swaggerClient<paths>(axiosInstance);
 
 export class NotesAPI {
   static getNotes = requestFactory('/notes', 'get');
