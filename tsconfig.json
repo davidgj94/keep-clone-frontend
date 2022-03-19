@@ -14,15 +14,8 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react-jsx",
-    "baseUrl": ".",
-    "paths": {
-      "types/*": ["src/types/*"],
-      "config": ["src/config/index.ts"],
-      "api": ["src/api/index.ts"],
-      "#redux/*": ["src/redux/*"],
-      "hooks": ["src/hooks/index.ts"]
-    }
+    "jsx": "react-jsx"
   },
-  "include": ["src"]
+  "include": ["src"],
+  "extends": "./tsconfig.paths.json"
 }
