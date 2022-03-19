@@ -29,6 +29,18 @@ const modifyNote = createAsyncThunk(
     await NotesAPI.modifyNote({ path: { noteId }, body: { data: note } })
 );
 
+const modifyNoteAndRefetch = createAsyncThunk(
+  'notes/modifyNoteAndRefetch',
+  async (params: { noteId: string; note: Note }, thunkAPI) =>
+    thunkAPI
+      .dispatch(modifyNote(params))
+      .unwrap()
+      .then(() => {
+        thunkAPI.dispatch(slice.actions.reset());
+        thunkAPI.dispatch(fetchNotes({}));
+      })
+);
+
 type NoteState = {
   notesById: HashMap<Note>;
   noteList: {
@@ -76,6 +88,12 @@ export const slice = createSlice({
   },
 });
 
-export const actions = { ...slice.actions, fetchNotes, createNote, modifyNote };
+export const actions = {
+  ...slice.actions,
+  fetchNotes,
+  createNote,
+  modifyNote,
+  modifyNoteAndRefetch,
+};
 
 export default slice.reducer;

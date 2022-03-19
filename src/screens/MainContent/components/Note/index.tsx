@@ -13,7 +13,7 @@ import { CSSObject, styled, SxProps, Theme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 
 import { useAppSelector, useAppDispatch } from 'hooks';
-import MoreButton from './MoreButton';
+import Options from './Options';
 import NoteLabels from './NoteLabels';
 
 interface NoteBoxProps {
@@ -77,34 +77,11 @@ const Note = ({
         labelsIds={note.labels as string[]}
         noteId={note.id as string}
       />
-      <Stack
-        direction="row"
-        spacing={1}
-        className="options"
-        onClick={(e) => {
-          if (onOptionsClick) {
-            onOptionsClick();
-            e.stopPropagation();
-          }
-        }}
-      >
-        <IconButton size="small" color="inherit">
-          <AddAlertIcon />
-        </IconButton>
-        <IconButton size="small" color="inherit">
-          <PersonAddAlt1Icon />
-        </IconButton>
-        <IconButton size="small" color="inherit">
-          <PaletteIcon />
-        </IconButton>
-        <IconButton size="small" color="inherit">
-          <ImageIcon />
-        </IconButton>
-        <IconButton size="small" color="inherit">
-          <ArchiveIcon />
-        </IconButton>
-        <MoreButton allowOpenPopover={isFocused} note={note} />
-      </Stack>
+      <Options
+        isFocused={isFocused}
+        note={note}
+        onOptionsClick={onOptionsClick}
+      />
     </NoteBox>
   );
 };
