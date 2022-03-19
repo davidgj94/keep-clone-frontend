@@ -7,7 +7,7 @@ const axiosInstance = axios.create({
   baseURL: config.BACKEND_URL,
   headers: {
     Authorization: `Bearer ${
-      localStorage.getItem('keep-clone-access_token') || ''
+      localStorage.getItem('keep-clone-access-token') || ''
     }`,
   },
 });

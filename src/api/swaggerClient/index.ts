@@ -25,7 +25,7 @@ export const swaggerClient =
   async (
     parameters: ExtractParmeters<paths[Endpoint][Method]>
   ): Promise<ExtractResponse<paths[Endpoint][Method], 200 | 201>> => {
-    const swaggerParameters = parameters as unknown as SwaggerParams;
+    const swaggerParameters = (parameters || {}) as unknown as SwaggerParams;
     return axiosInstance
       .request({
         url: buildURL(url as string, swaggerParameters['path']),
