@@ -31,7 +31,7 @@ export const swaggerClient =
         url: buildURL(url as string, swaggerParameters.path),
         method,
         params: swaggerParameters.query,
-        data: swaggerParameters?.body?.data,
+        data: swaggerParameters.body?.data,
       } as AxiosRequestConfig)
       .then(({ data }) => data);
   };

@@ -38,7 +38,7 @@ const App = () => {
     <>
       {notes.map((note, index) => (
         <div
-          key={index}
+          key={note.id}
           style={{
             marginRight: 'auto',
             marginLeft: 'auto',

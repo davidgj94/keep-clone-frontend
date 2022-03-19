@@ -103,7 +103,7 @@ const Note = ({
         <IconButton size="small" color="inherit">
           <ArchiveIcon />
         </IconButton>
-        <MoreButton allowOpenPopover={isFocused} />
+        <MoreButton allowOpenPopover={isFocused} note={note} />
       </Stack>
     </NoteBox>
   );
