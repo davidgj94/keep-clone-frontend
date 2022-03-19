@@ -73,7 +73,10 @@ const Note = ({
       <Typography id="modal-modal-description" sx={{ mt: 2 }}>
         {note?.content}
       </Typography>
-      <NoteLabels labelIds={note.labels as string[]} />
+      <NoteLabels
+        labelsIds={note.labels as string[]}
+        noteId={note.id as string}
+      />
       <Stack
         direction="row"
         spacing={1}
