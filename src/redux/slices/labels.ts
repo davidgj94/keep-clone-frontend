@@ -37,7 +37,9 @@ export const slice = createSlice({
   name: 'labels',
   // `createSlice` will infer the state type from the `initialState` argument
   initialState,
-  reducers: {},
+  reducers: {
+    reset: () => initialState,
+  },
   extraReducers: (builder) => {
     builder.addCase(fetchLabels.fulfilled, (state, action) => {
       const { data } = action.payload;
