@@ -2,7 +2,7 @@ import React from 'react';
 import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
 
-import { useAppSelector } from '../../../../hooks';
+import { useAppSelector } from 'hooks';
 
 interface NoteLabelProps {
   labelIds: string[];

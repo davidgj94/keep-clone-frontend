@@ -12,7 +12,7 @@ import Stack from '@mui/material/Stack';
 import { CSSObject, styled, SxProps, Theme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 
-import { useAppSelector, useAppDispatch } from '../../../../hooks';
+import { useAppSelector, useAppDispatch } from 'hooks';
 import MoreButton from './MoreButton';
 import NoteLabels from './NoteLabels';
 

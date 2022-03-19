@@ -1,8 +1,7 @@
-import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
-import type { AppDispatch, RootState } from '../store';
-import { HashMap } from '../../types/utils';
-import { definitions } from '../../types/swagger';
-import { NotesAPI } from '../../api';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { HashMap } from 'types/utils';
+import { definitions } from 'types/swagger';
+import { NotesAPI } from 'api';
 
 type Note = definitions['Note'];
 

@@ -4,8 +4,8 @@ import ClickAwayListener from '@mui/material/ClickAwayListener';
 
 import { flow } from 'lodash';
 
-import { useAppSelector, useAppDispatch } from '../../hooks';
-import { labelActions, noteActions } from '../../redux/slices';
+import { useAppSelector, useAppDispatch } from 'hooks';
+import { labelActions, noteActions } from '#redux/slices';
 import Note from './components/Note';
 import NoteModal from './components/NoteModal';
 import NoteBadgeHOC from './components/NoteBadgeHOC';
