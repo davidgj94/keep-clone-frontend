@@ -11,10 +11,12 @@ import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import { CSSObject, styled, SxProps, Theme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
+import TextField from '@mui/material/TextField';
 
 import { useAppSelector, useAppDispatch } from 'hooks';
 import Options from './Options';
 import NoteLabels from './NoteLabels';
+import NoteTextField from './NoteTextField';
 
 interface NoteBoxProps {
   isFocused?: boolean;
@@ -67,12 +69,22 @@ const Note = ({
       isFocused={isFocused}
       editMode={editMode}
     >
-      <Typography variant="h6" component="h2">
-        {note.title}
-      </Typography>
-      <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-        {note?.content}
-      </Typography>
+      {editMode && (
+        <>
+          <NoteTextField field="title" note={note} />
+          <NoteTextField field="content" note={note} />
+        </>
+      )}
+      {!editMode && (
+        <>
+          <Typography variant="h6" component="h2">
+            {note.title}
+          </Typography>
+          <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+            {note?.content}
+          </Typography>
+        </>
+      )}
       <NoteLabels
         labelsIds={note.labels as string[]}
         noteId={note.id as string}
