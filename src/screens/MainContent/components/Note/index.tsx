@@ -85,10 +85,23 @@ const Note = ({
           </Typography>
         </>
       )}
-      <NoteLabels
-        labelsIds={note.labels as string[]}
-        noteId={note.id as string}
-      />
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+        }}
+      >
+        <NoteLabels
+          labelsIds={note.labels as string[]}
+          noteId={note.id as string}
+        />
+        {editMode && (
+          <Typography variant="h6" component="h2">
+            {note.updatedAt || note.createdAt}
+          </Typography>
+        )}
+      </div>
       <Options
         isFocused={isFocused}
         note={note}
