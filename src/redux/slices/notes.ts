@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { HashMap } from 'types/utils';
 import { definitions } from 'types/swagger';
 import { NotesAPI } from 'api';
@@ -23,6 +23,15 @@ const createNote = createAsyncThunk(
   async (note: Note) => await NotesAPI.createNote({ body: { data: note } })
 );
 
+const createAndInsertNote = createAsyncThunk(
+  'notes/createAndInsertNote',
+  async (note: Note, thunkAPI) =>
+    thunkAPI
+      .dispatch(createNote(note))
+      .unwrap()
+      .then((note) => thunkAPI.dispatch(slice.actions.insertNote(note)))
+);
+
 const modifyNote = createAsyncThunk(
   'notes/modifyNote',
   async ({ noteId, note }: { noteId: string; note: Note }) =>
@@ -32,7 +41,10 @@ const modifyNote = createAsyncThunk(
 const modifyAndInvalidateNote = createAsyncThunk(
   'notes/modifyNoteAndRefetch',
   async (params: { noteId: string; note: Note }, thunkAPI) =>
-    thunkAPI.dispatch(modifyNote(params)).unwrap()
+    thunkAPI
+      .dispatch(modifyNote(params))
+      .unwrap()
+      .then((note) => thunkAPI.dispatch(slice.actions.invalidateNote(note)))
 );
 
 type NoteState = {
@@ -56,6 +68,16 @@ export const slice = createSlice({
   initialState,
   reducers: {
     reset: () => initialState,
+    insertNote: (state, action: PayloadAction<Note>) => {
+      const { id: noteId } = action.payload;
+      state.noteList.data.unshift(noteId as string);
+    },
+    invalidateNote: (state, action: PayloadAction<Note>) => {
+      const { id: idToRemove } = action.payload;
+      state.noteList.data = state.noteList.data.filter(
+        (id) => id !== idToRemove
+      );
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(fetchNotes.fulfilled, (state, action) => {
@@ -71,20 +93,12 @@ export const slice = createSlice({
       const newNote = action.payload;
       const noteId = newNote.id as string;
       state.notesById[noteId] = newNote;
-      state.noteList.data.unshift(noteId);
     });
 
     builder.addCase(modifyNote.fulfilled, (state, action) => {
       const newNote = action.payload;
       const noteId = newNote.id as string;
       state.notesById[noteId] = newNote;
-    });
-
-    builder.addCase(modifyAndInvalidateNote.fulfilled, (state, action) => {
-      const { id: idToRemove } = action.payload;
-      state.noteList.data = state.noteList.data.filter(
-        (id) => id !== idToRemove
-      );
     });
   },
 });
@@ -93,6 +107,7 @@ export const actions = {
   ...slice.actions,
   fetchNotes,
   createNote,
+  createAndInsertNote,
   modifyNote,
   modifyAndInvalidateNote,
 };

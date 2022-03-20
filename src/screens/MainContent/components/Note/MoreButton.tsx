@@ -33,7 +33,7 @@ const MoreButton = ({ allowOpenPopover, note }: MoreButtonProps) => {
   }, [allowOpenPopover]);
 
   const handleCopyNote = () => {
-    dispatch(noteActions.createNote(omit(note, 'id')));
+    dispatch(noteActions.createAndInsertNote(omit(note, 'id')));
     togglePopover();
   };
 
