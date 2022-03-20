@@ -29,16 +29,10 @@ const modifyNote = createAsyncThunk(
     await NotesAPI.modifyNote({ path: { noteId }, body: { data: note } })
 );
 
-const modifyNoteAndRefetch = createAsyncThunk(
+const modifyAndInvalidateNote = createAsyncThunk(
   'notes/modifyNoteAndRefetch',
   async (params: { noteId: string; note: Note }, thunkAPI) =>
-    thunkAPI
-      .dispatch(modifyNote(params))
-      .unwrap()
-      .then(() => {
-        thunkAPI.dispatch(slice.actions.reset());
-        thunkAPI.dispatch(fetchNotes({}));
-      })
+    thunkAPI.dispatch(modifyNote(params)).unwrap()
 );
 
 type NoteState = {
@@ -85,6 +79,13 @@ export const slice = createSlice({
       const noteId = newNote.id as string;
       state.notesById[noteId] = newNote;
     });
+
+    builder.addCase(modifyAndInvalidateNote.fulfilled, (state, action) => {
+      const { id: idToRemove } = action.payload;
+      state.noteList.data = state.noteList.data.filter(
+        (id) => id !== idToRemove
+      );
+    });
   },
 });
 
@@ -93,7 +94,7 @@ export const actions = {
   fetchNotes,
   createNote,
   modifyNote,
-  modifyNoteAndRefetch,
+  modifyAndInvalidateNote,
 };
 
 export default slice.reducer;

@@ -27,7 +27,7 @@ const Options = ({ isFocused, note, onOptionsClick }: OptionsProps) => {
   const dispatch = useAppDispatch();
   const handleArchive = () =>
     dispatch(
-      noteActions.modifyNoteAndRefetch({
+      noteActions.modifyAndInvalidateNote({
         noteId: note.id as string,
         note: { archived: true },
       })
