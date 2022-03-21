@@ -1,7 +1,9 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+
 import { HashMap } from 'types/utils';
 import { definitions } from 'types/swagger';
 import { NotesAPI } from 'api';
+import { RootState } from '../store';
 
 type Note = definitions['Note'];
 
@@ -30,6 +32,15 @@ const createAndInsertNote = createAsyncThunk(
       .dispatch(createNote(note))
       .unwrap()
       .then((note) => thunkAPI.dispatch(slice.actions.insertNote(note)))
+);
+
+const insertIfNotEmpty = createAsyncThunk(
+  'notes/insertIfNotEmpty',
+  async (noteId: string, thunkAPI) => {
+    const state = thunkAPI.getState() as RootState;
+    const note = state.notes.notesById[noteId];
+    if (!note.empty) thunkAPI.dispatch(slice.actions.insertNote(note));
+  }
 );
 
 const modifyNote = createAsyncThunk(
@@ -110,6 +121,7 @@ export const actions = {
   createAndInsertNote,
   modifyNote,
   modifyAndInvalidateNote,
+  insertIfNotEmpty,
 };
 
 export default slice.reducer;
