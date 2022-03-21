@@ -80,9 +80,7 @@ const Note = ({
           <Typography variant="h6" component="h2">
             {note.title}
           </Typography>
-          <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-            {note?.content}
-          </Typography>
+          <Typography sx={{ mt: 2 }}>{note?.content}</Typography>
         </>
       )}
       <div

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 import ClickAwayListener from '@mui/material/ClickAwayListener';
-
+import { CSSTransition } from 'react-transition-group';
 import { flow } from 'lodash';
 
 import { useAppSelector, useAppDispatch } from 'hooks';
@@ -9,6 +9,7 @@ import { labelActions, noteActions } from '#redux/slices';
 import Note from './components/Note';
 import NoteModal from './components/NoteModal';
 import NoteBadgeHOC from './components/NoteBadgeHOC';
+import CreateNoteInput from './components/CreateNoteInput';
 
 const App = () => {
   const dispatch = useAppDispatch();
@@ -36,6 +37,16 @@ const App = () => {
 
   return (
     <>
+      <div
+        style={{
+          marginRight: 'auto',
+          marginLeft: 'auto',
+          width: '400px',
+          marginBottom: '40px',
+        }}
+      >
+        <CreateNoteInput />
+      </div>
       {notes.map((note, index) => (
         <div
           key={note.id}
@@ -43,6 +54,7 @@ const App = () => {
             marginRight: 'auto',
             marginLeft: 'auto',
             width: '400px',
+            marginTop: '20px',
             marginBottom: '20px',
             ...(openModal
               ? {
@@ -52,7 +64,10 @@ const App = () => {
           }}
         >
           <ClickAwayListener
-            onClickAway={() => setFocusedNoteId(undefined)}
+            onClickAway={() => {
+              console.log(index);
+              setFocusedNoteId(undefined);
+            }}
             mouseEvent={!openModal ? 'onClick' : false}
           >
             <NoteBadgeHOC
