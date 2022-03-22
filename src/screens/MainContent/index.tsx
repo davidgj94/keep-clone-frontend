@@ -68,7 +68,9 @@ const App = () => {
               console.log(index);
               setFocusedNoteId(undefined);
             }}
-            mouseEvent={!openModal ? 'onClick' : false}
+            mouseEvent={
+              !openModal && isNoteFocused(note.id) ? 'onClick' : false
+            }
           >
             <NoteBadgeHOC
               badgeVisible={isNoteFocused(note.id)}
