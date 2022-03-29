@@ -22,7 +22,7 @@ interface ModalProps {
 const NoteModal = ({ noteId, open, onClose }: ModalProps) => (
   <Modal open={open} onClose={onClose}>
     {noteId ? (
-      <Note noteId={noteId} customStyles={modalStyle} editMode />
+      <Note noteId={noteId} customStyles={modalStyle} mode="edit" />
     ) : (
       <></>
     )}

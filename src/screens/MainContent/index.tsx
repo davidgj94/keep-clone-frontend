@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react';
 
-import ClickAwayListener from '@mui/material/ClickAwayListener';
-import { CSSTransition } from 'react-transition-group';
-import { flow } from 'lodash';
+import config from 'config';
 
 import { useAppSelector, useAppDispatch } from 'hooks';
 import { labelActions, noteActions } from '#redux/slices';
-import Note from './components/Note';
 import NoteModal from './components/NoteModal';
-import NoteBadgeHOC from './components/NoteBadgeHOC';
 import CreateNoteInput from './components/CreateNoteInput';
+import Item from './components/Item';
+import InfiniteLoader from './components/InfiniteLoader';
 
 const App = () => {
   const dispatch = useAppDispatch();
@@ -21,14 +19,15 @@ const App = () => {
   const [selectMode, setSelectMode] = React.useState(false);
   const [selectedNotesIds, setSelectedNotesIds] = React.useState<string[]>([]);
 
-  const notes = useAppSelector((state) =>
-    state.notes.noteList.data.map((noteId) => state.notes.notesById[noteId])
-  );
+  const noteIdList = useAppSelector((state) => state.notes.noteList.data);
+  const labelIdList = useAppSelector((state) => state.labels.labelsList);
+  const hasMore = useAppSelector((state) => state.notes.noteList.hasMore);
 
-  console.log(notes);
+  const loadMore = async () => void dispatch(noteActions.fetchNotes({}));
 
-  const isNoteFocused = (noteId: string | undefined) =>
-    noteId === focusedNoteId;
+  const onBadgeClick = () => setSelectMode(true);
+
+  const onClick = !selectMode ? toggleModal : undefined;
 
   useEffect(() => {
     dispatch(labelActions.fetchLabels());
@@ -47,45 +46,25 @@ const App = () => {
       >
         <CreateNoteInput />
       </div>
-      {notes.map((note, index) => (
-        <div
-          key={note.id}
-          style={{
-            marginRight: 'auto',
-            marginLeft: 'auto',
-            width: '400px',
-            marginTop: '20px',
-            marginBottom: '20px',
-            ...(openModal
-              ? {
-                  visibility: !isNoteFocused(note.id) ? 'visible' : 'hidden',
-                }
-              : {}),
-          }}
-        >
-          <ClickAwayListener
-            onClickAway={() => {
-              console.log(index);
-              setFocusedNoteId(undefined);
-            }}
-            mouseEvent={
-              !openModal && isNoteFocused(note.id) ? 'onClick' : false
-            }
-          >
-            <NoteBadgeHOC
-              badgeVisible={isNoteFocused(note.id)}
-              onBadgeClick={() => setSelectMode(true)}
-            >
-              <Note
-                noteId={note.id as string}
-                onClick={flow([toggleModal, () => setFocusedNoteId(note.id)])}
-                onOptionsClick={() => setFocusedNoteId(note.id)}
-                isFocused={isNoteFocused(note.id)}
+
+      <InfiniteLoader hasMore={hasMore} loadMore={loadMore}>
+        {noteIdList && labelIdList && (
+          <>
+            {noteIdList.map((noteId) => (
+              <Item
+                focusedNoteId={focusedNoteId}
+                setFocusedNoteId={setFocusedNoteId}
+                isModalOpen={openModal}
+                onBadgeClick={onBadgeClick}
+                onClick={onClick}
+                key={noteId}
+                noteId={noteId}
+                mode={selectMode ? 'select' : 'display'}
               />
-            </NoteBadgeHOC>
-          </ClickAwayListener>
-        </div>
-      ))}
+            ))}
+          </>
+        )}
+      </InfiniteLoader>
       <NoteModal
         noteId={focusedNoteId}
         onClose={toggleModal}

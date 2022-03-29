@@ -9,15 +9,24 @@ type Note = definitions['Note'];
 
 const fetchNotes = createAsyncThunk(
   'notes/fetchNotes',
-  async ({
-    cursor,
-    limit = 10,
-    labelId,
-  }: {
-    cursor?: string;
-    limit?: number;
-    labelId?: string;
-  }) => await NotesAPI.getNotes({ query: { cursor, limit, labelId } })
+  async (
+    {
+      limit = 10,
+      labelId,
+    }: {
+      limit?: number;
+      labelId?: string;
+    },
+    thunkAPI
+  ) => {
+    const {
+      notes: {
+        noteList: { cursor, currentRequestId, hasMore },
+      },
+    } = thunkAPI.getState() as RootState;
+    if (currentRequestId !== thunkAPI.requestId || !hasMore) return;
+    return await NotesAPI.getNotes({ query: { cursor, limit, labelId } });
+  }
 );
 
 const createNote = createAsyncThunk(
@@ -64,13 +73,14 @@ type NoteState = {
     data: string[];
     cursor?: string;
     hasMore: boolean;
+    currentRequestId?: string;
   };
 };
 
 // Define the initial state using that type
 const initialState: NoteState = {
   notesById: {},
-  noteList: { data: [], hasMore: true },
+  noteList: { data: [], hasMore: true, currentRequestId: undefined },
 };
 
 export const slice = createSlice({
@@ -91,13 +101,22 @@ export const slice = createSlice({
     },
   },
   extraReducers: (builder) => {
+    builder.addCase(fetchNotes.pending, (state, action) => {
+      if (!state.noteList.currentRequestId)
+        state.noteList.currentRequestId = action.meta.requestId;
+    });
+    builder.addCase(fetchNotes.rejected, (state, action) => {
+      state.noteList.currentRequestId = undefined;
+    });
     builder.addCase(fetchNotes.fulfilled, (state, action) => {
+      if (!action.payload) return;
       const { data = [], cursor, hasMore = false } = action.payload;
       data.forEach((note) => {
         state.notesById[note.id as string] = note;
       });
       state.noteList.data.push(...data.map(({ id }) => id as string));
       state.noteList = { ...state.noteList, cursor, hasMore };
+      state.noteList.currentRequestId = undefined;
     });
 
     builder.addCase(createNote.fulfilled, (state, action) => {

@@ -48,7 +48,7 @@ const CreateNoteInput = () => {
           mouseEvent="onClick"
         >
           <div>
-            <Note noteId={newNoteId as string} editMode />
+            <Note noteId={newNoteId as string} mode="edit" />
           </div>
         </ClickAwayListener>
       </CSSTransition>

@@ -20,25 +20,33 @@ import NoteTextField from './NoteTextField';
 
 interface NoteBoxProps {
   isFocused?: boolean;
-  editMode?: boolean;
+  mode: 'display' | 'edit' | 'select';
 }
 
 const NoteBox = styled(Box, {
   shouldForwardProp: (prop) => prop !== 'isFocused' && prop !== 'editMode',
-})<NoteBoxProps>(({ theme, isFocused, editMode }) => ({
+})<NoteBoxProps>(({ theme, isFocused, mode }) => ({
   width: '400px',
   boxSizing: 'border-box',
   border: '1px solid #000',
   boxShadow: 'none',
   padding: theme.spacing(4),
   borderRadius: theme.shape.borderRadius,
-  ...(!editMode
-    ? ({
+  ...(mode == 'display'
+    ? {
         '.options': { visibility: 'hidden' },
         ':hover': { boxShadow: theme.shadows[10] },
         ':hover .options': { visibility: 'visible' },
         ...(isFocused ? { '.options': { visibility: 'inherit' } } : {}),
-      } as CSSObject)
+      }
+    : {}),
+  ...(mode == 'select'
+    ? {
+        '.options': {
+          visibility: 'hidden',
+        },
+        ...(isFocused ? { border: '2px solid #000' } : {}),
+      }
     : {}),
 }));
 
@@ -48,7 +56,7 @@ interface NoteProps {
   onClick?: () => void;
   onOptionsClick?: () => void;
   isFocused?: boolean;
-  editMode?: boolean;
+  mode: 'display' | 'edit' | 'select';
 }
 
 const Note = ({
@@ -57,9 +65,11 @@ const Note = ({
   onClick,
   onOptionsClick,
   isFocused = false,
-  editMode = false,
+  mode = 'display',
 }: NoteProps) => {
   const note = useAppSelector((state) => state.notes.notesById[noteId]);
+  const editMode = mode == 'edit';
+  const selectMode = mode == 'select';
   return (
     <NoteBox
       component="div"
@@ -67,7 +77,7 @@ const Note = ({
       sx={customStyles}
       onClick={() => onClick && onClick()}
       isFocused={isFocused}
-      editMode={editMode}
+      mode={mode}
     >
       {editMode && (
         <>
@@ -90,10 +100,10 @@ const Note = ({
           justifyContent: 'space-between',
         }}
       >
-        <NoteLabels
+        {/* <NoteLabels
           labelsIds={note.labels as string[]}
           noteId={note.id as string}
-        />
+        /> */}
         {editMode && (
           <Typography variant="h6" component="h2">
             {note.updatedAt || note.createdAt}
@@ -103,7 +113,7 @@ const Note = ({
       <Options
         isFocused={isFocused}
         note={note}
-        onOptionsClick={onOptionsClick}
+        onOptionsClick={!selectMode ? onOptionsClick : onClick}
       />
     </NoteBox>
   );
