@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { flow } from 'lodash';
 
 import config from 'config';
-
 import { useAppSelector, useAppDispatch } from 'hooks';
 import { labelActions, noteActions } from '#redux/slices';
 import NoteModal from './components/NoteModal';
@@ -27,7 +27,16 @@ const App = () => {
 
   const onBadgeClick = () => setSelectMode(true);
 
-  const onClick = !selectMode ? toggleModal : undefined;
+  const onClickFactory = (noteId: string) =>
+    !selectMode
+      ? flow([toggleModal, () => setFocusedNoteId(noteId)])
+      : () => setSelectedNotesIds((prev) => [...prev, noteId]);
+
+  const isNoteFocused = (noteId: string) =>
+    !selectMode ? noteId === focusedNoteId : selectedNotesIds.includes(noteId);
+
+  const onClickAway = () =>
+    !selectMode ? setFocusedNoteId(undefined) : setSelectMode(false);
 
   useEffect(() => {
     dispatch(labelActions.fetchLabels());
@@ -52,11 +61,14 @@ const App = () => {
           <>
             {noteIdList.map((noteId) => (
               <Item
-                focusedNoteId={focusedNoteId}
-                setFocusedNoteId={setFocusedNoteId}
                 isModalOpen={openModal}
                 onBadgeClick={onBadgeClick}
-                onClick={onClick}
+                onClick={onClickFactory(noteId)}
+                onOptionsClick={
+                  !selectMode ? () => setFocusedNoteId(noteId) : undefined
+                }
+                onClickAway={onClickAway}
+                isNoteFocused={isNoteFocused(noteId)}
                 key={noteId}
                 noteId={noteId}
                 mode={selectMode ? 'select' : 'display'}

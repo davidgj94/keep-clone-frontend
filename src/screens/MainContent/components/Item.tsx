@@ -20,62 +20,56 @@ export const ItemContext = createContext<ItemContextValue>(
 );
 
 interface ItemProps {
-  noteId?: string;
-  focusedNoteId: string | undefined;
-  setFocusedNoteId: (noteId: string | undefined) => void;
+  noteId: string;
   isModalOpen: boolean;
+  isNoteFocused: boolean;
+  onClickAway: () => void;
   onBadgeClick: () => void;
-  onClick?: () => void;
+  onClick: () => void;
+  onOptionsClick?: () => void;
   mode: 'display' | 'select';
 }
 
 const Item = ({
   noteId,
   isModalOpen,
-  focusedNoteId,
+  isNoteFocused,
   onBadgeClick,
   onClick,
-  setFocusedNoteId,
+  onClickAway,
+  onOptionsClick,
   mode,
-}: ItemProps) => {
-  if (!noteId) return <></>;
-  const isNoteFocused = noteId === focusedNoteId;
-  return (
-    <div
-      key={noteId}
-      style={{
-        marginRight: 'auto',
-        marginLeft: 'auto',
-        width: '400px',
-        marginTop: '20px',
-        marginBottom: '20px',
-        ...(isModalOpen
-          ? {
-              visibility: !isNoteFocused ? 'visible' : 'hidden',
-            }
-          : {}),
-      }}
+}: ItemProps) => (
+  <div
+    key={noteId}
+    style={{
+      marginRight: 'auto',
+      marginLeft: 'auto',
+      width: '400px',
+      marginTop: '20px',
+      marginBottom: '20px',
+      ...(isModalOpen
+        ? {
+            visibility: !isNoteFocused ? 'visible' : 'hidden',
+          }
+        : {}),
+    }}
+  >
+    <ClickAwayListener
+      onClickAway={onClickAway}
+      mouseEvent={!isModalOpen && isNoteFocused ? 'onClick' : false}
     >
-      <ClickAwayListener
-        onClickAway={() => setFocusedNoteId(undefined)}
-        mouseEvent={!isModalOpen && isNoteFocused ? 'onClick' : false}
-      >
-        <NoteBadgeHOC badgeVisible={isNoteFocused} onBadgeClick={onBadgeClick}>
-          <Note
-            noteId={noteId as string}
-            onClick={
-              onClick
-                ? flow([onClick, () => setFocusedNoteId(noteId)])
-                : () => setFocusedNoteId(noteId)
-            }
-            onOptionsClick={() => setFocusedNoteId(noteId)}
-            isFocused={isNoteFocused}
-            mode={mode}
-          />
-        </NoteBadgeHOC>
-      </ClickAwayListener>
-    </div>
-  );
-};
+      <NoteBadgeHOC badgeVisible={isNoteFocused} onBadgeClick={onBadgeClick}>
+        <Note
+          noteId={noteId as string}
+          onClick={onClick}
+          onOptionsClick={onOptionsClick || onClick}
+          isFocused={isNoteFocused}
+          mode={mode}
+        />
+      </NoteBadgeHOC>
+    </ClickAwayListener>
+  </div>
+);
 
 export default Item;
