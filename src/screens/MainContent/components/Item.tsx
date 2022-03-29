@@ -1,5 +1,4 @@
 import React, { createContext, useContext } from 'react';
-import { flow } from 'lodash';
 
 import ClickAwayListener from '@mui/material/ClickAwayListener';
 

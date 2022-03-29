@@ -69,13 +69,17 @@ const Note = ({
 }: NoteProps) => {
   const note = useAppSelector((state) => state.notes.notesById[noteId]);
   const editMode = mode == 'edit';
-  const selectMode = mode == 'select';
   return (
     <NoteBox
       component="div"
       tabIndex={0}
       sx={customStyles}
-      onClick={() => onClick && onClick()}
+      onClick={(e) => {
+        if (onClick) {
+          onClick();
+          e.stopPropagation();
+        }
+      }}
       isFocused={isFocused}
       mode={mode}
     >
@@ -113,7 +117,7 @@ const Note = ({
       <Options
         isFocused={isFocused}
         note={note}
-        onOptionsClick={!selectMode ? onOptionsClick : onClick}
+        onOptionsClick={onOptionsClick}
       />
     </NoteBox>
   );

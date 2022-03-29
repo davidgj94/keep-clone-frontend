@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useReducer, Reducer } from 'react';
 import { flow } from 'lodash';
 
 import config from 'config';
@@ -9,6 +9,46 @@ import CreateNoteInput from './components/CreateNoteInput';
 import Item from './components/Item';
 import InfiniteLoader from './components/InfiniteLoader';
 
+type SelectModeActionTypes = 'INSERT_NOTE' | 'RESET';
+
+interface SelectModeState {
+  selectMode: boolean;
+  selectedNotesIds: string[];
+}
+
+const selectModeInitialState: SelectModeState = {
+  selectMode: false,
+  selectedNotesIds: [],
+};
+
+const selectModeInsert = (
+  noteId: string
+): { type: SelectModeActionTypes; payload: string } => ({
+  type: 'INSERT_NOTE',
+  payload: noteId,
+});
+
+const selectModeReset = (): { type: SelectModeActionTypes } => ({
+  type: 'RESET',
+});
+
+const selectModeReducer: Reducer<
+  SelectModeState,
+  { type: SelectModeActionTypes; payload?: string }
+> = (state, action) => {
+  switch (action.type) {
+    case 'INSERT_NOTE':
+      return {
+        selectMode: true,
+        selectedNotesIds: [...state.selectedNotesIds, action.payload as string],
+      };
+    case 'RESET':
+      return selectModeInitialState;
+    default:
+      return state;
+  }
+};
+
 const App = () => {
   const dispatch = useAppDispatch();
   const [openModal, setOpenModal] = React.useState(false);
@@ -16,8 +56,11 @@ const App = () => {
   const [focusedNoteId, setFocusedNoteId] = React.useState<
     string | undefined
   >();
-  const [selectMode, setSelectMode] = React.useState(false);
-  const [selectedNotesIds, setSelectedNotesIds] = React.useState<string[]>([]);
+  const [selectModeState, selectModeDispatch] = useReducer(
+    selectModeReducer,
+    selectModeInitialState
+  );
+  const { selectMode, selectedNotesIds } = selectModeState;
 
   const noteIdList = useAppSelector((state) => state.notes.noteList.data);
   const labelIdList = useAppSelector((state) => state.labels.labelsList);
@@ -25,23 +68,25 @@ const App = () => {
 
   const loadMore = async () => void dispatch(noteActions.fetchNotes({}));
 
-  const onBadgeClick = () => setSelectMode(true);
-
   const onClickFactory = (noteId: string) =>
     !selectMode
       ? flow([toggleModal, () => setFocusedNoteId(noteId)])
-      : () => setSelectedNotesIds((prev) => [...prev, noteId]);
+      : () => selectModeDispatch(selectModeInsert(noteId));
 
   const isNoteFocused = (noteId: string) =>
     !selectMode ? noteId === focusedNoteId : selectedNotesIds.includes(noteId);
 
   const onClickAway = () =>
-    !selectMode ? setFocusedNoteId(undefined) : setSelectMode(false);
+    !selectMode
+      ? setFocusedNoteId(undefined)
+      : selectModeDispatch(selectModeReset());
 
   useEffect(() => {
     dispatch(labelActions.fetchLabels());
     dispatch(noteActions.fetchNotes({}));
   }, []);
+
+  console.log(selectedNotesIds);
 
   return (
     <>
@@ -62,7 +107,9 @@ const App = () => {
             {noteIdList.map((noteId) => (
               <Item
                 isModalOpen={openModal}
-                onBadgeClick={onBadgeClick}
+                onBadgeClick={() =>
+                  selectModeDispatch(selectModeInsert(noteId))
+                }
                 onClick={onClickFactory(noteId)}
                 onOptionsClick={
                   !selectMode ? () => setFocusedNoteId(noteId) : undefined
