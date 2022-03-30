@@ -7,7 +7,6 @@ import Toolbar from '@mui/material/Toolbar';
 import List from '@mui/material/List';
 import CssBaseline from '@mui/material/CssBaseline';
 import Typography from '@mui/material/Typography';
-import Paper from '@mui/material/Paper';
 import IconButton from '@mui/material/IconButton';
 import SearchIcon from '@mui/icons-material/Search';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -18,10 +17,8 @@ import ListItemText from '@mui/material/ListItemText';
 import InboxIcon from '@mui/icons-material/MoveToInbox';
 import MailIcon from '@mui/icons-material/Mail';
 import InputBase from '@mui/material/InputBase';
-import Modal from '@mui/material/Modal';
 
-import CustomizedDialog from './Modal';
-import EnterNote from './EnterNote';
+import MainContent from './screens/MainContent';
 
 const drawerWidth = 240;
 
@@ -90,17 +87,6 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-const StyledPaper = styled(Box)(({ theme }) => ({
-  maxWidth: theme.spacing(100),
-  padding: theme.spacing(3),
-  marginRight: 'auto',
-  marginLeft: 'auto',
-  bgcolor: 'background.paper',
-  borderStyle: 'solid',
-  borderWidth: '1px',
-  ':hover': { boxShadow: theme.shadows[3] },
-}));
-
 interface AppBarProps extends MuiAppBarProps {
   open?: boolean;
 }
@@ -132,22 +118,7 @@ const Drawer = styled(MuiDrawer, {
   }),
 }));
 
-const title = 'Keep';
-const content = `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-eiusmod tempor incididunt ut labore et dolore magna aliqua. Rhoncus
-dolor purus non enim praesent elementum facilisis leo vel. Risus at
-ultrices mi tempus imperdiet. Semper risus in hendrerit gravida rutrum
-quisque non tellus. Convallis convallis tellus id interdum velit
-laoreet id donec ultrices. Odio morbi quis commodo odio aenean sed
-adipiscing. Amet nisl suscipit adipiscing bibendum est ultricies
-integer quis. Cursus euismod quis viverra nibh cras. Metus vulputate
-eu scelerisque felis imperdiet proin fermentum leo. Mauris commodo
-quis imperdiet massa tincidunt. Cras tincidunt lobortis feugiat
-vivamus at augue. At augue eget arcu dictum varius duis at consectetur
-lorem. Velit sed ullamcorper morbi tincidunt. Lorem donec massa sapien
-faucibus et molestie ac.`;
-
-export default function MiniDrawer() {
+export default function App() {
   const [open, setOpen] = React.useState(false);
   const [openEdit, setOpenEdit] = React.useState(false);
 
@@ -236,47 +207,8 @@ export default function MiniDrawer() {
         sx={{ flexGrow: 1, p: 3, justifyContent: 'center' }}
       >
         <DrawerHeader />
-        <EnterNote />
-        {openEdit && (
-          <Modal
-            open={openEdit}
-            onClose={toggleOpenEdit}
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <StyledPaper>
-              <Typography variant="h6" component="h6" color="black">
-                {title}
-              </Typography>
-              {content}
-            </StyledPaper>
-          </Modal>
-        )}
-        <StyledPaper
-          onClick={toggleOpenEdit}
-          sx={{ visibility: !openEdit ? 'visible' : 'hidden' }}
-        >
-          <Typography variant="h6" component="h6" color="black">
-            {title}
-          </Typography>
-          {content}
-        </StyledPaper>
-        <StyledPaper>
-          <Typography variant="h6" component="h6" color="black">
-            {title}
-          </Typography>
-          {content}
-        </StyledPaper>
+        <MainContent />
       </Box>
-      {/* <CustomizedDialog
-        content={content}
-        title={title}
-        handleClose={toggleOpenEdit}
-        open={openEdit}
-      ></CustomizedDialog> */}
     </Box>
   );
 }
