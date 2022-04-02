@@ -56,30 +56,35 @@ const App = () => {
   const [focusedNoteId, setFocusedNoteId] = React.useState<
     string | undefined
   >();
-  const [selectModeState, selectModeDispatch] = useReducer(
-    selectModeReducer,
-    selectModeInitialState
-  );
-  const { selectMode, selectedNotesIds } = selectModeState;
 
   const noteIdList = useAppSelector((state) => state.notes.noteList.data);
   const labelIdList = useAppSelector((state) => state.labels.labelsList);
   const hasMore = useAppSelector((state) => state.notes.noteList.hasMore);
+  const selectedNotesIds = useAppSelector((state) => state.notes.selectedNotes);
+  const selectMode = selectedNotesIds.length > 0;
 
   const loadMore = async () => void dispatch(noteActions.fetchNotes({}));
+
+  const isNoteSelected = (noteId: string) => selectedNotesIds.includes(noteId);
+  const isNoteFocused = (noteId: string) =>
+    !selectMode ? noteId === focusedNoteId : isNoteSelected(noteId);
+
+  const toggleSelectNote = (noteId: string) =>
+    dispatch(
+      !isNoteSelected(noteId)
+        ? noteActions.insertSelected(noteId)
+        : noteActions.removeSelected(noteId)
+    );
 
   const onClickFactory = (noteId: string) =>
     !selectMode
       ? flow([toggleModal, () => setFocusedNoteId(noteId)])
-      : () => selectModeDispatch(selectModeInsert(noteId));
-
-  const isNoteFocused = (noteId: string) =>
-    !selectMode ? noteId === focusedNoteId : selectedNotesIds.includes(noteId);
+      : () => toggleSelectNote(noteId);
 
   const onClickAway = () =>
     !selectMode
       ? setFocusedNoteId(undefined)
-      : selectModeDispatch(selectModeReset());
+      : dispatch(noteActions.resetSelected());
 
   useEffect(() => {
     dispatch(labelActions.fetchLabels());
@@ -107,9 +112,7 @@ const App = () => {
             {noteIdList.map((noteId) => (
               <Item
                 isModalOpen={openModal}
-                onBadgeClick={() =>
-                  selectModeDispatch(selectModeInsert(noteId))
-                }
+                onBadgeClick={() => toggleSelectNote(noteId)}
                 onClick={onClickFactory(noteId)}
                 onOptionsClick={
                   !selectMode ? () => setFocusedNoteId(noteId) : undefined

@@ -75,12 +75,14 @@ type NoteState = {
     hasMore: boolean;
     currentRequestId?: string;
   };
+  selectedNotes: string[];
 };
 
 // Define the initial state using that type
 const initialState: NoteState = {
   notesById: {},
   noteList: { data: [], hasMore: true, currentRequestId: undefined },
+  selectedNotes: [],
 };
 
 export const slice = createSlice({
@@ -98,6 +100,19 @@ export const slice = createSlice({
       state.noteList.data = state.noteList.data.filter(
         (id) => id !== idToRemove
       );
+    },
+    insertSelected: (state, action: PayloadAction<string>) => {
+      const noteIdToInsert = action.payload;
+      state.selectedNotes.push(noteIdToInsert);
+    },
+    removeSelected: (state, action: PayloadAction<string>) => {
+      const noteIdToRemove = action.payload;
+      state.selectedNotes = state.selectedNotes.filter(
+        (noteId) => noteId != noteIdToRemove
+      );
+    },
+    resetSelected: (state) => {
+      state.selectedNotes = [];
     },
   },
   extraReducers: (builder) => {
