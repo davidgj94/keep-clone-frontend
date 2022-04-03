@@ -63,7 +63,7 @@ const App = () => {
   const selectedNotesIds = useAppSelector((state) => state.notes.selectedNotes);
   const selectMode = selectedNotesIds.length > 0;
 
-  const loadMore = async () => void dispatch(noteActions.fetchNotes({}));
+  const loadMore = async () => void dispatch(noteActions.fetchNotes());
 
   const isNoteSelected = (noteId: string) => selectedNotesIds.includes(noteId);
   const isNoteFocused = (noteId: string) =>
@@ -88,7 +88,7 @@ const App = () => {
 
   useEffect(() => {
     dispatch(labelActions.fetchLabels());
-    dispatch(noteActions.fetchNotes({}));
+    dispatch(noteActions.fetchNotes());
   }, []);
 
   console.log(selectedNotesIds);

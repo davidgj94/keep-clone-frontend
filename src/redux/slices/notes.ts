@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 
+import config from 'config';
 import { HashMap } from 'types/utils';
 import { definitions } from 'types/swagger';
 import { NotesAPI } from 'api';
@@ -7,25 +8,31 @@ import { RootState } from '../store';
 
 type Note = definitions['Note'];
 
-const fetchNotes = createAsyncThunk(
-  'notes/fetchNotes',
+const setQueryAndRefetch = createAsyncThunk(
+  'notes/setQueryAndRefecth',
   async (
-    {
-      limit = 10,
-      labelId,
-    }: {
-      limit?: number;
-      labelId?: string;
-    },
+    { labelId, archive }: { labelId?: string; archive?: boolean },
     thunkAPI
   ) => {
+    const query = labelId ? { labelId } : archive ? { archive } : undefined;
+    thunkAPI.dispatch(slice.actions.setQuery(query));
+    thunkAPI.dispatch(fetchNotes());
+  }
+);
+
+const fetchNotes = createAsyncThunk(
+  'notes/fetchNotes',
+  async (_: void, thunkAPI) => {
     const {
       notes: {
-        noteList: { cursor, currentRequestId, hasMore },
+        noteList: { cursor, currentRequestId, hasMore, query },
       },
     } = thunkAPI.getState() as RootState;
     if (currentRequestId !== thunkAPI.requestId || !hasMore) return;
-    return await NotesAPI.getNotes({ query: { cursor, limit, labelId } });
+
+    return await NotesAPI.getNotes({
+      query: { cursor, limit: config.LIMIT, ...query },
+    });
   }
 );
 
@@ -59,7 +66,7 @@ const modifyNote = createAsyncThunk(
 );
 
 const modifyAndInvalidateNote = createAsyncThunk(
-  'notes/modifyNoteAndRefetch',
+  'notes/modifyAndInvalidateNote',
   async (params: { noteId: string; note: Note }, thunkAPI) =>
     thunkAPI
       .dispatch(modifyNote(params))
@@ -73,6 +80,7 @@ type NoteState = {
     data: string[];
     cursor?: string;
     hasMore: boolean;
+    query?: { labelId: string } | { archive: true };
     currentRequestId?: string;
   };
   selectedNotes: string[];
@@ -91,6 +99,12 @@ export const slice = createSlice({
   initialState,
   reducers: {
     reset: () => initialState,
+    setQuery: (
+      state,
+      action: PayloadAction<NoteState['noteList']['query']>
+    ) => {
+      state.noteList.query = action.payload;
+    },
     insertNote: (state, action: PayloadAction<Note>) => {
       const { id: noteId } = action.payload;
       state.noteList.data.unshift(noteId as string);
@@ -156,6 +170,7 @@ export const actions = {
   modifyNote,
   modifyAndInvalidateNote,
   insertIfNotEmpty,
+  setQueryAndRefetch,
 };
 
 export default slice.reducer;

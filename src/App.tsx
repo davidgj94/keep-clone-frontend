@@ -18,6 +18,7 @@ import InboxIcon from '@mui/icons-material/MoveToInbox';
 import MailIcon from '@mui/icons-material/Mail';
 
 import AppToolbar from './components/AppToolbar';
+import DraweList from './components/DrawerList';
 import MainContent from './screens/MainContent';
 
 const drawerWidth = 240;
@@ -103,29 +104,7 @@ export default function App() {
       </AppBar>
       <Drawer variant="permanent" open={open}>
         <DrawerHeader></DrawerHeader>
-        <List>
-          {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
-            <ListItemButton
-              key={text}
-              sx={{
-                minHeight: 48,
-                justifyContent: open ? 'initial' : 'center',
-                px: 2.5,
-              }}
-            >
-              <ListItemIcon
-                sx={{
-                  minWidth: 0,
-                  mr: open ? 3 : 'auto',
-                  justifyContent: 'center',
-                }}
-              >
-                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-              </ListItemIcon>
-              <ListItemText primary={text} sx={{ opacity: open ? 1 : 0 }} />
-            </ListItemButton>
-          ))}
-        </List>
+        <DraweList open={open} />
       </Drawer>
       <Box
         component="main"
