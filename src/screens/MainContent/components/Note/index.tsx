@@ -68,6 +68,7 @@ const Note = ({
   mode = 'display',
 }: NoteProps) => {
   const note = useAppSelector((state) => state.notes.notesById[noteId]);
+  if (!note) return <></>;
   const editMode = mode == 'edit';
   return (
     <NoteBox

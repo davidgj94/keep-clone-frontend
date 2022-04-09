@@ -11,10 +11,11 @@ type Note = definitions['Note'];
 const setQueryAndRefetch = createAsyncThunk(
   'notes/setQueryAndRefecth',
   async (
-    { labelId, archive }: { labelId?: string; archive?: boolean },
+    { labelId, archived }: { labelId?: string; archived?: boolean },
     thunkAPI
   ) => {
-    const query = labelId ? { labelId } : archive ? { archive } : undefined;
+    const query = labelId ? { labelId } : archived ? { archived } : undefined;
+    thunkAPI.dispatch(slice.actions.reset());
     thunkAPI.dispatch(slice.actions.setQuery(query));
     thunkAPI.dispatch(fetchNotes());
   }
@@ -80,11 +81,15 @@ type NoteState = {
     data: string[];
     cursor?: string;
     hasMore: boolean;
-    query?: { labelId: string } | { archive: true };
+    query?: { labelId: string } | { archived: true };
     currentRequestId?: string;
   };
   selectedNotes: string[];
 };
+
+export const isLabelQuery = (
+  query: NonNullable<NoteState['noteList']['query']>
+): boolean => !!(query as { labelId: string }).labelId;
 
 // Define the initial state using that type
 const initialState: NoteState = {

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 
 import AddAlertIcon from '@mui/icons-material/AddAlert';
 import ArchiveIcon from '@mui/icons-material/Archive';
+import UnArchiveIcon from '@mui/icons-material/Unarchive';
 import ImageIcon from '@mui/icons-material/Image';
 import PaletteIcon from '@mui/icons-material/Palette';
 import PersonAddAlt1Icon from '@mui/icons-material/PersonAddAlt1';
@@ -16,6 +17,7 @@ import { useAppSelector, useAppDispatch } from 'hooks';
 import MoreButton from './MoreButton';
 import { noteActions } from '#redux/slices';
 import { definitions } from 'types/swagger';
+import { isLabelQuery } from '#redux/slices/notes';
 
 interface OptionsProps {
   isFocused: boolean;
@@ -25,13 +27,22 @@ interface OptionsProps {
 
 const Options = ({ isFocused, note, onOptionsClick }: OptionsProps) => {
   const dispatch = useAppDispatch();
+  const query = useAppSelector((state) => state.notes.noteList.query);
+  const inArchivedList = query && !isLabelQuery(query);
   const handleArchive = () =>
-    dispatch(
-      noteActions.modifyAndInvalidateNote({
-        noteId: note.id as string,
-        note: { archived: true },
-      })
-    );
+    inArchivedList
+      ? dispatch(
+          noteActions.modifyAndInvalidateNote({
+            noteId: note.id as string,
+            note: { archived: false },
+          })
+        )
+      : dispatch(
+          noteActions.modifyAndInvalidateNote({
+            noteId: note.id as string,
+            note: { archived: true },
+          })
+        );
   return (
     <Stack
       direction="row"
@@ -57,7 +68,8 @@ const Options = ({ isFocused, note, onOptionsClick }: OptionsProps) => {
         <ImageIcon />
       </IconButton>
       <IconButton size="small" color="inherit" onClick={handleArchive}>
-        <ArchiveIcon />
+        {inArchivedList && <UnArchiveIcon />}
+        {!inArchivedList && <ArchiveIcon />}
       </IconButton>
       <MoreButton allowOpenPopover={isFocused} note={note} />
     </Stack>
