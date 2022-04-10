@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import Modal from '@mui/material/Modal';
 import { SxProps, Theme } from '@mui/material/styles';
@@ -17,7 +17,7 @@ import TextField from '@mui/material/TextField';
 
 import { useAppSelector, useAppDispatch } from 'hooks';
 import { Box } from '@mui/material';
-import { flow } from 'lodash';
+import { flow, isEqual } from 'lodash';
 import { labelActions } from '#redux/slices';
 import { definitions } from 'types/swagger';
 
@@ -25,26 +25,27 @@ type Label = definitions['Label'];
 
 interface CreateLabelListItemProps {
   creating: boolean;
-  onCreate: (labelName: string) => void;
   onClose: () => void;
   onClick: () => void;
 }
 
 const CreateLabelListItem = ({
   creating,
-  onCreate,
   onClick,
   onClose,
 }: CreateLabelListItemProps) => {
+  const dispatch = useAppDispatch();
   const onListItemClick = (e: any) =>
     creating && flow([() => e.stopPropagation(), onClose])();
   const [labelName, setLabelName] = useState<string | undefined>();
+  const createLabel = () =>
+    labelName && dispatch(labelActions.createLabel(labelName as string));
   return (
     <ListItem
       onClick={onClick}
       secondaryAction={
         creating ? (
-          <IconButton onClick={() => labelName && onCreate(labelName)}>
+          <IconButton onClick={() => createLabel()}>
             <DoneIcon />
           </IconButton>
         ) : null
@@ -73,20 +74,38 @@ const CreateLabelListItem = ({
 
 interface EditLabelListItemProps {
   label: Label;
-  onDelete: () => void;
-  onLabelChange: () => void;
   editing: boolean;
   onClick: () => void;
 }
 
 const EditLabelListItem = ({
   label,
-  onDelete,
-  onLabelChange,
   onClick,
   editing,
 }: EditLabelListItemProps) => {
+  const dispatch = useAppDispatch();
   const [showDeleteIcon, setShowDeleteIcon] = useState(false);
+  const [labelName, setLabelName] = useState(label.name as string);
+
+  const mountRef = useRef(false);
+
+  const saveChanges = useCallback(
+    (labelName: string) =>
+      void dispatch(
+        labelActions.modifyLabel({
+          labelId: label.id as string,
+          label: { name: labelName },
+        })
+      ),
+    [label]
+  );
+
+  useEffect(() => {
+    if (mountRef.current && !editing) return saveChanges(labelName);
+    mountRef.current = true;
+  }, [editing, labelName, saveChanges, mountRef]);
+
+  const onDelete = () => '';
 
   return (
     <ListItem
@@ -110,7 +129,8 @@ const EditLabelListItem = ({
             ...(!editing ? { disableUnderline: true } : {}),
           }}
           inputProps={{ style: { fontWeight: 'bold' } }}
-          value={label.name}
+          value={labelName}
+          onChange={(e) => setLabelName(e.target.value)}
         />
       </ListItemText>
     </ListItem>
@@ -127,19 +147,17 @@ const modalStyle = {
 
 interface ModalProps {
   open: boolean;
+  onClose: () => void;
 }
 
-const EditLabelsModal = ({ open }: ModalProps) => {
-  const dispatch = useAppDispatch();
+const EditLabelsModal = ({ open, onClose }: ModalProps) => {
   const labels = useAppSelector((state) => {
     const { labelsById, labelsList } = state.labels;
     return labelsList.map((labelId) => labelsById[labelId]);
-  });
+  }, isEqual);
 
   const [creating, setCreating] = useState(false);
   const [editingLabelId, setEditingLabelId] = useState<string | undefined>();
-  const onCreateLabel = (labelName: string) =>
-    dispatch(labelActions.createLabel(labelName));
 
   useEffect(() => {
     if (editingLabelId) setCreating(false);
@@ -148,15 +166,18 @@ const EditLabelsModal = ({ open }: ModalProps) => {
   const isEditing = (labelId: string) =>
     !creating && editingLabelId === labelId;
 
+  useEffect(() => {
+    setEditingLabelId(undefined);
+  }, [open]);
+
   return (
-    <Modal open={open}>
+    <Modal open={open} onClose={onClose}>
       <Box sx={modalStyle}>
         <List>
           <CreateLabelListItem
             creating={creating}
             onClick={() => setCreating(true)}
             onClose={() => setCreating(false)}
-            onCreate={onCreateLabel}
           />
           {labels.map((label) => (
             <EditLabelListItem
@@ -164,8 +185,6 @@ const EditLabelsModal = ({ open }: ModalProps) => {
               label={label}
               editing={isEditing(label.id as string)}
               onClick={() => setEditingLabelId(label.id)}
-              onDelete={() => ''}
-              onLabelChange={() => ''}
             />
           ))}
         </List>

@@ -80,7 +80,7 @@ const DraweList = ({ open }: DrawerListProps) => {
           )
         )}
       </List>
-      <EditLabelsModal open={editLabels} />
+      <EditLabelsModal open={editLabels} onClose={() => setEditLabels(false)} />
     </>
   );
 };
