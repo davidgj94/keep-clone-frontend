@@ -13,7 +13,8 @@ const fetchLabels = createAsyncThunk(
 
 const createLabel = createAsyncThunk(
   'labels/createLabel',
-  async (label: Label) => await LabelsAPI.createLabel({ body: { data: label } })
+  async (name: string) =>
+    await LabelsAPI.createLabel({ body: { data: { name } } })
 );
 
 const modifyLabel = createAsyncThunk(
@@ -48,6 +49,7 @@ export const slice = createSlice({
           acc[val.id as string] = val;
           return acc;
         }, {} as typeof state.labelsById);
+        state.labelsList = data.map(({ id }) => id as string);
       }
     });
 

@@ -12,6 +12,7 @@ import ListItemText from '@mui/material/ListItemText';
 import { useAppSelector, useAppDispatch } from 'hooks';
 import { labelActions, noteActions } from '#redux/slices';
 import { flow, isEqual } from 'lodash';
+import EditLabelsModal from './EditLabelsModal';
 
 interface DrawerListProps {
   open: boolean;
@@ -51,33 +52,36 @@ const DraweList = ({ open }: DrawerListProps) => {
   };
 
   return (
-    <List>
-      {Object.entries(listItemNamesIcon).map(
-        ([itemName, { icon: iconComponent, effectFunc: onClickFunc }]) => (
-          <ListItemButton
-            key={itemName}
-            selected={selectedItemName == itemName}
-            onClick={flow([() => setSelectedItemName(itemName), onClickFunc])}
-            sx={{
-              minHeight: 48,
-              justifyContent: open ? 'initial' : 'center',
-              px: 2.5,
-            }}
-          >
-            <ListItemIcon
+    <>
+      <List>
+        {Object.entries(listItemNamesIcon).map(
+          ([itemName, { icon: iconComponent, effectFunc: onClickFunc }]) => (
+            <ListItemButton
+              key={itemName}
+              selected={selectedItemName == itemName}
+              onClick={flow([() => setSelectedItemName(itemName), onClickFunc])}
               sx={{
-                minWidth: 0,
-                mr: open ? 3 : 'auto',
-                justifyContent: 'center',
+                minHeight: 48,
+                justifyContent: open ? 'initial' : 'center',
+                px: 2.5,
               }}
             >
-              {iconComponent}
-            </ListItemIcon>
-            <ListItemText primary={itemName} sx={{ opacity: open ? 1 : 0 }} />
-          </ListItemButton>
-        )
-      )}
-    </List>
+              <ListItemIcon
+                sx={{
+                  minWidth: 0,
+                  mr: open ? 3 : 'auto',
+                  justifyContent: 'center',
+                }}
+              >
+                {iconComponent}
+              </ListItemIcon>
+              <ListItemText primary={itemName} sx={{ opacity: open ? 1 : 0 }} />
+            </ListItemButton>
+          )
+        )}
+      </List>
+      <EditLabelsModal open={editLabels} />
+    </>
   );
 };
 
