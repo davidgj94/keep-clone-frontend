@@ -88,8 +88,9 @@ type NoteState = {
 };
 
 export const isLabelQuery = (
-  query: NonNullable<NoteState['noteList']['query']>
-): boolean => !!(query as { labelId: string }).labelId;
+  query?: NonNullable<NoteState['noteList']['query']>
+): query is { labelId: string } =>
+  !!(query && (query as { labelId: string }).labelId);
 
 // Define the initial state using that type
 const initialState: NoteState = {

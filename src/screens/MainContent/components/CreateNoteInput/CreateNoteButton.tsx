@@ -15,12 +15,20 @@ const stopPropagation = (e: any) => e.stopPropagation();
 
 interface CreateNoteButtonProps {
   onCreatedNote: (noteId: string) => void;
+  labelId: string | undefined;
 }
 
-const CreateNoteButton = ({ onCreatedNote }: CreateNoteButtonProps) => {
+const CreateNoteButton = ({
+  onCreatedNote,
+  labelId,
+}: CreateNoteButtonProps) => {
   const dispatch = useAppDispatch();
   const onClickHandler = () =>
-    dispatch(noteActions.createNote({}))
+    dispatch(
+      noteActions.createNote({
+        ...(labelId ? { labels: [labelId] } : undefined),
+      })
+    )
       .unwrap()
       .then(({ id: noteId }) => onCreatedNote(noteId as string));
 

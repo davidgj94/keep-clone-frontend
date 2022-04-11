@@ -4,15 +4,20 @@ import ClickAwayListener from '@mui/material/ClickAwayListener';
 import { CSSTransition } from 'react-transition-group';
 import { flow } from 'lodash';
 
-import { useAppDispatch } from 'hooks';
-import { labelActions, noteActions } from '#redux/slices';
+import { useAppDispatch, useAppSelector } from 'hooks';
+import { noteActions } from '#redux/slices';
 import Note from '../Note';
 import CreateNoteButton from './CreateNoteButton';
+import { isLabelQuery } from '#redux/slices/notes';
 
 type CreateNoteStates = 'idle' | 'creating' | 'created';
 
 const CreateNoteInput = () => {
   const dispatch = useAppDispatch();
+  const labelId = useAppSelector((state) => {
+    const { query } = state.notes.noteList;
+    if (isLabelQuery(query)) return query.labelId;
+  });
   const [newNoteId, setNewNoteId] = useState<string | undefined>();
   const [createNoteState, setCreateNoteState] =
     useState<CreateNoteStates>('idle');
@@ -34,6 +39,7 @@ const CreateNoteInput = () => {
     <>
       {createNoteState == 'idle' && (
         <CreateNoteButton
+          labelId={labelId}
           onCreatedNote={(noteId: string) => setNewNoteId(noteId)}
         />
       )}
