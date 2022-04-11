@@ -105,10 +105,10 @@ const Note = ({
           justifyContent: 'space-between',
         }}
       >
-        {/* <NoteLabels
+        <NoteLabels
           labelsIds={note.labels as string[]}
           noteId={note.id as string}
-        /> */}
+        />
         {editMode && (
           <Typography variant="h6" component="h2">
             {note.updatedAt || note.createdAt}
