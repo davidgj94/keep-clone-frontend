@@ -24,4 +24,5 @@ export class LabelsAPI {
   static getLabels = requestFactory('/labels', 'get');
   static createLabel = requestFactory('/labels', 'post');
   static modifyLabel = requestFactory('/labels/{labelId}', 'put');
+  static deleteLabel = requestFactory('/labels/{labelId}', 'delete');
 }

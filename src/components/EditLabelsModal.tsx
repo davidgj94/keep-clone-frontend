@@ -105,7 +105,7 @@ const EditLabelListItem = ({
     mountRef.current = true;
   }, [editing, labelName, saveChanges, mountRef]);
 
-  const onDelete = () => '';
+  const onDelete = () => dispatch(labelActions.deleteLabel(label.id as string));
 
   return (
     <ListItem

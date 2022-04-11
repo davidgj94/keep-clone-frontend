@@ -3,6 +3,7 @@ import { HashMap } from 'types/utils';
 import { definitions } from 'types/swagger';
 import { LabelsAPI } from 'api';
 import { Label } from '@mui/icons-material';
+import { omit } from 'lodash';
 
 type Label = definitions['Label'];
 
@@ -21,6 +22,11 @@ const modifyLabel = createAsyncThunk(
   'labels/modifyLabel',
   async ({ labelId, label }: { labelId: string; label: Label }) =>
     await LabelsAPI.modifyLabel({ path: { labelId }, body: { data: label } })
+);
+
+const deleteLabel = createAsyncThunk(
+  'labels/deleteLabel',
+  async (labelId: string) => await LabelsAPI.deleteLabel({ path: { labelId } })
 );
 
 type LabelState = {
@@ -65,6 +71,14 @@ export const slice = createSlice({
       const labelId = newLabel.id as string;
       state.labelsById[labelId] = newLabel;
     });
+
+    builder.addCase(deleteLabel.fulfilled, (state, action) => {
+      const { id: labelIdToRemove } = action.payload;
+      state.labelsById = omit(state.labelsById, [labelIdToRemove as string]);
+      state.labelsList = state.labelsList.filter(
+        (labelId) => labelId !== labelIdToRemove
+      );
+    });
   },
 });
 
@@ -73,6 +87,7 @@ export const actions = {
   fetchLabels,
   createLabel,
   modifyLabel,
+  deleteLabel,
 };
 
 export default slice.reducer;

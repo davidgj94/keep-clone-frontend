@@ -14,7 +14,9 @@ interface NoteLabelProps {
 const NoteLabels = ({ noteId, labelsIds }: NoteLabelProps) => {
   const dispatch = useAppDispatch();
   const labels = useAppSelector((state) =>
-    labelsIds.map((labelId) => state.labels.labelsById[labelId])
+    labelsIds
+      .map((labelId) => state.labels.labelsById[labelId])
+      .filter((label) => label)
   );
   const onDeleteFactory = (label: definitions['Label']) => () =>
     dispatch(
