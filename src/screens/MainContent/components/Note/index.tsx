@@ -56,7 +56,7 @@ interface NoteProps {
   onClick?: () => void;
   onOptionsClick?: () => void;
   isFocused?: boolean;
-  mode: 'display' | 'edit' | 'select';
+  mode: 'display' | 'edit' | 'select' | 'create';
 }
 
 const Note = ({
@@ -69,7 +69,8 @@ const Note = ({
 }: NoteProps) => {
   const note = useAppSelector((state) => state.notes.notesById[noteId]);
   if (!note) return <></>;
-  const editMode = mode == 'edit';
+  const creatingNewNote = mode == 'create';
+  const editMode = mode == 'edit' || creatingNewNote;
   return (
     <NoteBox
       component="div"
@@ -82,7 +83,7 @@ const Note = ({
         }
       }}
       isFocused={isFocused}
-      mode={mode}
+      mode={creatingNewNote ? 'edit' : mode}
     >
       {editMode && (
         <>
@@ -109,7 +110,7 @@ const Note = ({
           labelsIds={note.labels as string[]}
           noteId={note.id as string}
         />
-        {editMode && (
+        {editMode && !creatingNewNote && (
           <Typography variant="h6" component="h2">
             {note.updatedAt || note.createdAt}
           </Typography>

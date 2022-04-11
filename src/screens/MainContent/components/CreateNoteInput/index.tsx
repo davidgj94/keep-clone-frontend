@@ -12,7 +12,17 @@ import { isLabelQuery } from '#redux/slices/notes';
 
 type CreateNoteStates = 'idle' | 'creating' | 'created';
 
-const CreateNoteInput = () => {
+interface CreateNoteInputProps {
+  open: boolean;
+  onButtonClick: () => void;
+  onClose: () => void;
+}
+
+const CreateNoteInput = ({
+  open,
+  onButtonClick,
+  onClose,
+}: CreateNoteInputProps) => {
   const dispatch = useAppDispatch();
   const labelId = useAppSelector((state) => {
     const { query } = state.notes.noteList;
@@ -25,6 +35,7 @@ const CreateNoteInput = () => {
   const onExitCreateNote = flow([
     () => dispatch(noteActions.insertIfNotEmpty(newNoteId as string)),
     () => setCreateNoteState('idle'),
+    onClose,
   ]);
 
   useEffect(() => {
@@ -40,12 +51,15 @@ const CreateNoteInput = () => {
       {createNoteState == 'idle' && (
         <CreateNoteButton
           labelId={labelId}
-          onCreatedNote={(noteId: string) => setNewNoteId(noteId)}
+          onCreatedNote={flow([
+            (noteId: string) => setNewNoteId(noteId),
+            onButtonClick,
+          ])}
         />
       )}
       <CSSTransition
-        in={createNoteState == 'creating'}
-        timeout={300}
+        in={createNoteState == 'creating' && open}
+        timeout={0}
         unmountOnExit
         onExited={onExitCreateNote}
       >
@@ -54,7 +68,7 @@ const CreateNoteInput = () => {
           mouseEvent="onClick"
         >
           <div>
-            <Note noteId={newNoteId as string} mode="edit" />
+            <Note noteId={newNoteId as string} mode="create" />
           </div>
         </ClickAwayListener>
       </CSSTransition>

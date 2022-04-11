@@ -17,6 +17,7 @@ const MainContent = () => {
     string | undefined
   >();
   const [allowCreateNote, setAllowCreateNote] = useState(true);
+  const [openCreateNote, setOpenCreateNote] = useState(false);
 
   const noteIdList = useAppSelector((state) => state.notes.noteList.data);
   const labelIdList = useAppSelector((state) => state.labels.labelsList);
@@ -46,7 +47,9 @@ const MainContent = () => {
   const onClickAway = () =>
     !selectMode
       ? setFocusedNoteId(undefined)
-      : dispatch(noteActions.resetSelected());
+      : void dispatch(noteActions.resetSelected());
+
+  const closeCreateNote = () => setOpenCreateNote(false);
 
   useEffect(() => {
     dispatch(labelActions.fetchLabels());
@@ -74,7 +77,11 @@ const MainContent = () => {
             marginBottom: '40px',
           }}
         >
-          <CreateNoteInput />
+          <CreateNoteInput
+            onButtonClick={() => setOpenCreateNote(true)}
+            open={openCreateNote}
+            onClose={() => setOpenCreateNote(false)}
+          />
         </div>
       )}
 
@@ -84,10 +91,15 @@ const MainContent = () => {
             {noteIdList.map((noteId) => (
               <Item
                 isModalOpen={openModal}
-                onBadgeClick={() => toggleSelectNote(noteId)}
-                onClick={onClickFactory(noteId)}
+                onBadgeClick={flow([
+                  () => toggleSelectNote(noteId),
+                  closeCreateNote,
+                ])}
+                onClick={flow([onClickFactory(noteId), closeCreateNote])}
                 onOptionsClick={
-                  !selectMode ? () => setFocusedNoteId(noteId) : undefined
+                  !selectMode
+                    ? flow([() => setFocusedNoteId(noteId), closeCreateNote])
+                    : undefined
                 }
                 onClickAway={onClickAway}
                 isNoteFocused={isNoteFocused(noteId)}
