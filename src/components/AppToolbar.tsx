@@ -57,6 +57,8 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 
 interface AppToolbarProps {
   onMenuIconClick: () => void;
+  signIn: () => void;
+  signOut: () => void;
 }
 
 const AppToolbar = ({ onMenuIconClick }: AppToolbarProps) => {

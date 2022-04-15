@@ -21,6 +21,10 @@ import AppToolbar from './components/AppToolbar';
 import DraweList from './components/DrawerList';
 import MainContent from './screens/MainContent';
 
+import { useFirebaseAuth } from './hooks/firebase';
+import { useAppDispatch } from './hooks/redux';
+import { labelActions, noteActions, userActions } from '#redux/slices';
+
 const drawerWidth = 240;
 
 const openedMixin = (theme: Theme): CSSObject => ({
@@ -81,8 +85,14 @@ const Drawer = styled(MuiDrawer, {
 }));
 
 export default function App() {
+  const dispatch = useAppDispatch();
   const [open, setOpen] = React.useState(false);
   const [openEdit, setOpenEdit] = React.useState(false);
+  const [signIn, signOut] = useFirebaseAuth((user) => {
+    dispatch(userActions.setUser(user));
+    dispatch(labelActions.fetchLabels());
+    dispatch(noteActions.fetchNotes());
+  });
 
   const toggleDrawer = () => setOpen((prev) => !prev);
   const toggleOpenEdit = () => setOpenEdit((prev) => !prev);
@@ -100,7 +110,11 @@ export default function App() {
           borderBottomStyle: 'solid',
         }}
       >
-        <AppToolbar onMenuIconClick={toggleDrawer} />
+        <AppToolbar
+          onMenuIconClick={toggleDrawer}
+          signIn={signIn}
+          signOut={signOut}
+        />
       </AppBar>
       <Drawer variant="permanent" open={open}>
         <DrawerHeader></DrawerHeader>

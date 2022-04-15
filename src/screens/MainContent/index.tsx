@@ -52,11 +52,6 @@ const MainContent = () => {
   const closeCreateNote = () => setOpenCreateNote(false);
 
   useEffect(() => {
-    dispatch(labelActions.fetchLabels());
-    dispatch(noteActions.fetchNotes());
-  }, []);
-
-  useEffect(() => {
     setFocusedNoteId(undefined);
     if (query) {
       if (!isLabelQuery(query)) return setAllowCreateNote(false);
