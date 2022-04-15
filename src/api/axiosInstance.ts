@@ -18,7 +18,7 @@ const refreshToken = async () => {
   if (tokenResult) {
     const { expirationTime, token } = tokenResult;
     // Subsequent requests will include these headers
-    axiosInstance.defaults.headers.common['Authorization'] = `Bearer: ${token}`;
+    axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     axiosInstance.defaults.headers.common['Expiration'] = expirationTime;
     return tokenResult.token;
   }
@@ -31,7 +31,7 @@ axiosInstance.interceptors.request.use(async (axiosConfig) => {
       // We need to update axiosConfig so that current request doesn't fail
       axiosConfig.headers = {
         ...axiosConfig.headers,
-        Authorization: `Bearer: ${token}`,
+        Authorization: `Bearer ${token}`,
       };
   }
   return axiosConfig;
