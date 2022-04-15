@@ -1,16 +1,6 @@
-import axios from 'axios';
 import { paths } from '../types/swagger';
-import { swaggerClient } from './swaggerClient';
-import config from '../config';
-
-const axiosInstance = axios.create({
-  baseURL: config.BACKEND_URL,
-  headers: {
-    Authorization: `Bearer ${
-      localStorage.getItem('keep-clone-access-token') || ''
-    }`,
-  },
-});
+import swaggerClient from './swaggerClient';
+import axiosInstance from './axiosInstance';
 
 const requestFactory = swaggerClient<paths>(axiosInstance);
 

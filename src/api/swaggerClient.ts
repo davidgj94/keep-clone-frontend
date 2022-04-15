@@ -16,7 +16,7 @@ const buildURL = (url: string, parameters: any = {}): string =>
     url
   );
 
-export const swaggerClient =
+const swaggerClient =
   <paths>(axiosInstance: AxiosInstance) =>
   <Endpoint extends keyof paths, Method extends keyof paths[Endpoint]>(
     url: Endpoint,
@@ -35,3 +35,5 @@ export const swaggerClient =
       } as AxiosRequestConfig)
       .then(({ data }) => data);
   };
+
+export default swaggerClient;
