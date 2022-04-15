@@ -17,6 +17,7 @@
     "ecmaVersion": "latest",
     "sourceType": "module"
   },
+  "ignorePatterns": [".env"],
   "plugins": ["react", "@typescript-eslint"],
   "rules": {}
 }
